@@ -2559,7 +2559,18 @@ window.__reddPos=()=>redd.position;
 // ---- TEST ADMIN PANEL: teleport to any character or place (remove this block before release)
 {const b=document.createElement('button');b.id='adm';b.className='pill';b.textContent='🛠';document.body.appendChild(b);
 const pn=document.createElement('div');pn.id='admp';document.body.appendChild(pn);
-const tp=(x,z,lbl)=>{if(/Redd/.test(lbl)){window.__reddForce=1;redd.visible=true}P.x=x;P.z=z+3;P.a=Math.PI;try{say('Teleported: '+lbl,1800)}catch(e){}pn.style.display='none'};
+const tp=(x,z,lbl)=>{
+ if(/Redd/.test(lbl)){window.__reddForce=1;redd.visible=true}
+ try{if(typeof IN!=='undefined'&&IN&&typeof doExit==='function')doExit()}catch(e){}
+ let fx=0,fz=1,dist=2.4,face=Math.PI,door=false;
+ try{if(typeof ENTS==='function'){const e=ENTS().find(q=>Math.hypot(q.s.x-x,q.s.z-z)<2);if(e){const f=e.s.f||0;fx=Math.sin(f);fz=Math.cos(f);dist=(e.s.hd||3.2)+2.1;face=f+Math.PI;door=true}}}catch(err){}
+ if(!door){fx=0;fz=1;dist=2.4;face=Math.PI}
+ P.x=x+fx*dist;P.z=z+fz*dist;P.a=face;
+ if(typeof pl!=='undefined'&&pl){pl.visible=true;pl.position.set(P.x,0,P.z);pl.rotation.y=P.a}
+ try{CF.x=P.x;CF.z=P.z;cyaw=tyaw=Math.atan2(fx,fz);cpit=.48;cdist=Math.max(8.5,Math.min(cdist||10,12));
+  const cp=Math.cos(cpit)*cdist;C.position.set(P.x+Math.sin(cyaw)*cp,1.15+Math.sin(cpit)*cdist,P.z+Math.cos(cyaw)*cp);C.lookAt(P.x,1.15,P.z)}catch(e){}
+ try{say('Teleported: '+lbl,1800)}catch(e){}
+ pn.style.display='none'};
 const chars=()=>{const a=[['🐰 Nook',npc.position.x,npc.position.z]];vils.forEach(v=>a.push(['🐾 '+v.name,v.g.position.x,v.g.position.z]));TN.forEach(n=>a.push(['🏘️ '+n.name+(n.g.visible===false?' (away)':''),n.g.position.x,n.g.position.z]));a.push(['🦊 Redd (forces open)',redd.position.x,redd.position.z],['🎵 K.K.'+(kk.visible?'':' (Sat 8pm+)'),kk.position.x,kk.position.z],['🥔 Daisy'+(dm.visible?'':' (Sun am)'),dm.position.x,dm.position.z]);return a};
 const places=()=>[['⛲ Town',TX,TZ+8],['🌾 Farm',(window.FARMC||[21.2,13.5])[0],(window.FARMC||[21.2,13.5])[1]],['🏪 Shop',SHOP[0],SHOP[1]],['🏛️ Museum',MUS[0],MUS[1]],['🧵 Able Sisters',SIS[0],SIS[1]],['🎣 Pond',PX,PZ+6],['✈️ Nook Stop',-10,-15],['🏠 Start',0,6]];
 const draw=()=>{const L=(t,a)=>'<h4>'+t+'</h4>'+a.map((q,i)=>'<button data-k="'+t+'" data-i="'+i+'">'+q[0]+'</button>').join('');pn.innerHTML=L('Places',places())+L('Characters',chars())};
