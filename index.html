@@ -1976,19 +1976,27 @@ const K={},joy={x:0,y:0};
  // Inject Studio CSS
  const stEl=document.createElement('style');
  stEl.textContent=`
-  #cust{width:min(96vw,980px)!important;max-height:min(94vh,900px)!important;padding:14px 15px!important}
-  #cust .studio-top{display:flex;gap:12px;align-items:stretch;background:linear-gradient(180deg,#d8f3ff,#fff8e1);border:3px solid #e3c987;border-radius:20px;padding:8px 10px;margin-bottom:8px;position:relative}
-  #cust #cust-cv{width:min(48vw,520px);height:min(54vh,620px);border-radius:16px;background:radial-gradient(circle at 50% 32%,#fff,#c5e8ff 62%,#9ad7a4 100%);border:2px solid #fff;box-shadow:inset 0 2px 8px rgba(0,0,0,.12);cursor:grab;flex:none;touch-action:none}
-  #cust .sld{width:100%;accent-color:#7cc576;margin:0 0 6px}
-  #cust .studio-ctrl{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}
-  #cust .studio-ctrl .st-title{font-size:13px;font-weight:700;color:#5a4632}
-  #cust .emote-row{display:flex;flex-wrap:wrap;gap:4px}
-  #cust .emote-row button{font-size:11.5px;padding:4px 8px;border-radius:11px;border:2px solid #fff;background:#fffdf6;cursor:pointer}
+  #cust{width:min(96vw,980px)!important;max-height:min(94vh,900px)!important;padding:12px 12px 10px!important}
+  #cust .studio-top{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start;background:linear-gradient(180deg,#d8f3ff,#fff8e1);border:3px solid #e3c987;border-radius:18px;padding:8px;margin:0 0 8px}
+  #cust #cust-cv{flex:1 1 280px;width:min(46vw,520px);height:min(56vh,640px);max-width:100%;border-radius:16px;background:radial-gradient(circle at 50% 32%,#fff,#c5e8ff 62%,#9ad7a4 100%);border:2px solid #fff;box-shadow:inset 0 2px 8px rgba(0,0,0,.12);cursor:grab;touch-action:none}
+  #cust .sld{width:100%;accent-color:#7cc576;margin:0 0 8px;height:28px}
+  #cust .studio-bar{flex:0 0 auto;display:flex;flex-direction:column;gap:6px}
+  #cust .studio-bar .tool{min-height:40px;padding:8px 12px;font-size:14px;border-radius:14px;background:#fffdf6}
+  #cust .emote-row{flex:1 0 100%;display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;-webkit-overflow-scrolling:touch}
+  #cust .emote-row[hidden]{display:none}
+  #cust .emote-row button{flex:0 0 auto;min-height:40px;font-size:14px;padding:8px 12px;border-radius:14px;border:2px solid #fff;background:#fffdf6;cursor:pointer}
   #cust .emote-row button.act{background:#7cc576;color:#fff;border-color:#4f9a4a}
-  #cust .ctabs{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:8px}
-  #cust .ctabs button{padding:6px 4px;font-size:12px;border-radius:12px;border:2px solid #fff;background:#fff;box-shadow:0 2px 0 rgba(0,0,0,.12);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  #cust .ctabs button.on{background:#e8f8e5;border-color:#7cc576;color:#2e6b29}
-  #cust .cbody{max-height:36vh;overflow-y:auto;padding-right:4px;touch-action:pan-y}
+  #cust .ctabs{display:flex;gap:6px;overflow-x:auto;margin:0 0 8px;padding-bottom:2px;-webkit-overflow-scrolling:touch}
+  #cust .ctabs button{flex:0 0 auto;min-height:40px;padding:8px 14px;font-size:14px;border-radius:999px;border:2px solid #e3c987;background:#fff;box-shadow:none;cursor:pointer}
+  #cust .ctabs button.on{background:#2e6b29;border-color:#2e6b29;color:#fff}
+  #cust .cbody{max-height:34vh;overflow-y:auto;padding-right:2px;touch-action:pan-y}
+  @media(max-width:720px){
+   #cust .studio-top{flex-direction:column}
+   #cust #cust-cv{flex:0 0 auto;width:100%;height:46vh;min-height:300px}
+   #cust .studio-bar{flex-direction:row;width:100%}
+   #cust .studio-bar .tool{flex:1}
+   #cust .cbody{max-height:28vh}
+  }
   #cust .cl{font-size:12px;font-weight:700;margin:8px 0 4px;color:#6b4a2b;display:flex;justify-content:space-between;align-items:center}
   #cust .cr{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:4px}
   #cust .sw{width:26px;height:26px;padding:0;border-radius:50%;border:2.5px solid #fff;cursor:pointer}
@@ -2009,8 +2017,8 @@ const K={},joy={x:0,y:0};
    pScene=new T.Scene();
    pCam=new T.PerspectiveCamera(26,1,.1,40);
    pScene.add(new T.AmbientLight(0xfff4e4,.38));
-   const key=new T.DirectionalLight(0xfff6e8,1.15);key.position.set(2.4,4.4,3.4);pScene.add(key);
-   const fill=new T.DirectionalLight(0xb7d4ff,.62);fill.position.set(-3.4,2.4,1.6);pScene.add(fill);
+   const key=new T.DirectionalLight(0xfff6e8,1.28);key.position.set(2.2,4.8,3.2);pScene.add(key);
+   const fill=new T.DirectionalLight(0xb7d4ff,.72);fill.position.set(-3.2,2.6,2.2);pScene.add(fill);
    const rim=new T.DirectionalLight(0xffc9a0,.5);rim.position.set(-1.4,3.4,-3.6);pScene.add(rim);
    pPed=new T.Group();pScene.add(pPed);
    const pd=new T.Mesh(new T.CylinderGeometry(1.05,1.18,.18,24),new T.MeshLambertMaterial({color:0xd9a066}));
@@ -2048,8 +2056,8 @@ const K={},joy={x:0,y:0};
    pCam.position.set(0,2.15,2.35);
    pCam.lookAt(0,1.95,0);
   }else{
-   pCam.position.set(0,1.35,5.35);
-   pCam.lookAt(0,1.15,0);
+   pCam.position.set(0,1.55,4.35);
+   pCam.lookAt(0,1.28,0);
   }
   pRen.render(pScene,pCam);
  }
@@ -2078,8 +2086,7 @@ const K={},joy={x:0,y:0};
     row('👄 Mouth & Expression','mouth',MOUTH)+
     row('😊 Cheek Blush','blush',BLUSH)+
     row('✨ Face Markings & Beard','mark',MARK)+
-    row('💄 Makeup','makeup',[['none','None'],['lipstick','Lipstick'],['freckles','Freckles'],['glam','Glam']])+
-    sculptSliders();
+    row('💄 Makeup','makeup',[['none','None'],['lipstick','Lipstick'],['freckles','Freckles'],['glam','Glam']]);
   }else if(ctab==='hair'){
    bodyHtml=
     row('💇‍♀️ Hairstyle ('+HS.length+')','hs',HS)+
@@ -2151,23 +2158,20 @@ const K={},joy={x:0,y:0};
    </div>
    <div class="cbody">${bodyHtml}</div>${fit}<button id="ux">✕</button>`;
   if(!cu.querySelector('#cust-cv')){
-   cu.innerHTML=`<h3>🪞 Island Salon & Wardrobe Studio</h3>
+   cu.innerHTML=`<h3>Wardrobe</h3>
    <div class="studio-top">
-    <canvas id="cust-cv" title="Drag to spin the turntable"></canvas>
-    <div class="studio-ctrl">
-     <div class="st-title">Turntable · same body as in the world</div>
-     <div style="font-size:11px;opacity:.78">Drag to rotate. Outfit picks update this preview immediately.</div>
-     <div class="emote-row">
-      <button data-em="wave">👋 Wave</button>
-      <button data-em="dance">💃 Dance</button>
-      <button data-em="joy">✨ Joy</button>
-      <button data-em="pose">😎 Pose</button>
-      <button data-em="spin">🌸 Spin</button>
-     </div>
-     <div class="emote-row" style="margin-top:2px">
-      <button data-zoom="1">${zoomFace?'🧍 Full Body View':'🔍 Zoom Face'}</button>
-      <button data-rand="1" style="background:#ffb74d;color:#fff;border-color:#d68a2a">🎲 Randomize</button>
-     </div>
+    <canvas id="cust-cv" title="Drag to spin"></canvas>
+    <div class="studio-bar">
+     <button class="tool" data-zoom="1">${zoomFace?'Full':'Face'}</button>
+     <button class="tool" data-em-open="1">Emotes</button>
+     <button class="tool" data-rand="1" title="Randomize look">🎲</button>
+    </div>
+    <div class="emote-row" hidden>
+     <button data-em="wave">👋 Wave</button>
+     <button data-em="dance">💃 Dance</button>
+     <button data-em="joy">✨ Joy</button>
+     <button data-em="pose">😎 Pose</button>
+     <button data-em="spin">🌸 Spin</button>
     </div>
    </div><div id="cust-dyn">${tabs}</div>`;
    const cv=cu.querySelector('#cust-cv');
@@ -2192,9 +2196,11 @@ const K={},joy={x:0,y:0};
   const b=e.target.closest('button');if(!b)return;
   if(b.id==='ux'){cu.style.display='none';return}
   if(b.dataset.ct){ctab=b.dataset.ct;draw();return}
-  if(b.dataset.zoom){zoomFace=!zoomFace;b.textContent=zoomFace?'🧍 Full Body View':'🔍 Zoom Face';return}
+  if(b.dataset.zoom){zoomFace=!zoomFace;b.textContent=zoomFace?'Full':'Face';return}
+  if(b.dataset.emOpen){const row=cu.querySelector('.emote-row');if(row)row.hidden=!row.hidden;b.classList.toggle('on',row&&!row.hidden);return}
   if(b.dataset.em){
    window.PI_EMOTE={type:b.dataset.em,t:3.2};
+   cu.querySelectorAll('[data-em]').forEach(x=>x.classList.toggle('act',x===b));
    ding();return;
   }
   if(b.dataset.rand){
@@ -5900,7 +5906,7 @@ function newBody(g,o){const u=g.ud;u.look=o;u.noEmote=!!o.noEmote;u.nb=1;const z
  if(top==='sailor'){mk(new T.BoxGeometry(.52,.045,.3),t2,T0,0,2.72,-.06,3).rotation.x=.35;[-1,1].forEach(s=>mk(new T.BoxGeometry(.14,.24,.03),t2,T0,s*.14,2.55,.16,3));mk(new SP(.04,8,6),0xe53935,T0,0,2.48,.24,4)}
  if(outer){tube(T0,grow(1.095),pmap?0xffffff:outCol,18,0,0,0,4,pmap,OPEN[outer]?0.46:0);if(OPEN[outer]){mk(new T.BoxGeometry(.055,.55,.02),dk(outCol,.78),T0,.12,2.4,.24,5);mk(new T.BoxGeometry(.055,.55,.02),dk(outCol,.78),T0,-.12,2.4,.24,5)}
   if(outer==='coat'||outer==='cardigan')tube(T0,[[1.36,.42*tx,.32*tz],[1.55,.38*tx,.28*tz],[1.78,.34*tx,.24*tz]],pmap?0xffffff:outCol,16,0,0,0,4,pmap,outer==='cardigan'?.55:.42)}
- if(top==='hoodie'||outer==='hoodie'){const hc=top==='hoodie'?topCol:outCol;tube(T0,[[2.62,.18,.12],[2.9,.28,.2],[3.18,.2,.14],[3.28,.06,.04]],hc,12,0,0,-.2,4);mk(new T.BoxGeometry(.32,.16,.045),dk(hc,.88),T0,0,2.12,.24,5)}
+ if(top==='hoodie'||outer==='hoodie'){const hc=top==='hoodie'?topCol:outCol;tube(T0,[[2.5,.2,.14],[2.82,.36,.28],[3.12,.4,.32],[3.4,.24,.18],[3.52,.1,.08]],hc,16,0,.04,-.14,4,null,1.05);[-1,1].forEach(s=>{const flap=mk(new T.BoxGeometry(.12,.46,.26),hc,T0,s*.24,2.98,-.06,4);flap.rotation.z=-s*.18;flap.rotation.y=s*.35;mk(new T.CylinderGeometry(.012,.012,.32,5),t2,T0,s*.07,2.68,.22,5)});mk(new T.BoxGeometry(.4,.22,.07),dk(hc,.86),T0,0,2.02,.27,5)}
  if(top==='polo'||top==='button'){const colr=mk(new T.TorusGeometry(.115,.028,6,14),dk(topCol,.82),T0,0,2.96,0,3);colr.rotation.x=Math.PI/2}
  if(['pants','jeans','cargopants','joggers'].includes(bot)&&top!=='sundress'){const belt=mk(new T.TorusGeometry(.3,.018,6,16),0x3a2a1c,T0,0,1.9,0,4);belt.rotation.x=Math.PI/2;belt.scale.z=.72;mk(new T.BoxGeometry(.06,.04,.02),0xf2c94c,T0,0,1.9,.2,5)}
  if(['button','henley','polo','denim','coat','cardigan'].includes(top)||['coat','cardigan','denim'].includes(outer)){for(let i=0;i<4;i++)mk(new SP(.016,8,6),0xf2c94c,T0,.04,2.12+i*.16,.25,6)}
@@ -6051,11 +6057,16 @@ newDay();hud();say(loan>0?'Welcome to Pocket Island! Nook is waiting to be paid 
 #rn{right:34px!important;bottom:calc(env(safe-area-inset-bottom,0px) + 142px)!important}
 /* ---- every window: same centered book-page card ---- */
 #craft,#dex,#cust,#nemp,#petp,#artp,#seedp,#nb,#bag{position:fixed;z-index:20;left:50%!important;top:50%!important;right:auto!important;bottom:auto!important;transform:translate(-50%,-50%)!important;width:min(92vw,440px)!important;max-height:min(82vh,640px)!important;overflow:auto;box-sizing:border-box;padding:16px 16px 14px;border:4px solid var(--wood);background:var(--paper);color:var(--ink2);border-radius:26px;box-shadow:0 8px 0 rgba(90,70,50,.28);touch-action:pan-y}
-#cust{width:min(96vw,980px)!important;max-height:min(94vh,900px)!important}
-#cust #cust-cv{width:min(48vw,520px)!important;height:min(54vh,620px)!important}
-#cust .filters{display:flex;flex-wrap:wrap;gap:4px;margin:2px 0 8px}
-#cust .filters button{font-size:11px;padding:4px 8px;border-radius:11px;background:#fff}
-#cust .filters button.on{background:#e8f8e5;border-color:#7cc576;color:#2e6b29}
+#cust{z-index:40!important;width:min(96vw,980px)!important;max-height:min(94vh,900px)!important}
+#cust #cust-cv{width:min(46vw,520px)!important;height:min(56vh,640px)!important}
+#cust .filters{display:flex;flex-wrap:nowrap;gap:6px;margin:2px 0 8px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+#cust .filters button{flex:0 0 auto;min-height:36px;font-size:14px;padding:6px 12px;border-radius:999px;background:#fff}
+#cust .filters button.on{background:#2e6b29;border-color:#2e6b29;color:#fff}
+@media(max-width:720px){
+ #cust{width:min(96vw,560px)!important;max-height:min(96vh,920px)!important;padding:10px!important}
+ #cust #cust-cv{flex:0 0 auto!important;width:100%!important;height:46vh!important;min-height:300px!important}
+ #cust h3{font-size:17px}
+}
 #nemp,#petp{width:min(94vw,520px)!important}
 #nb,#bag{display:none}
 #craft h3,#dex h3,#cust h3,#nemp h3,#petp h3,#artp h3,#seedp h3,#nb h3,#bag h3{margin:0 40px 8px 0;font-size:19px}
