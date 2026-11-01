@@ -5879,8 +5879,8 @@ window.__fitOk=function(){if(window.__fitPay){if(typeof bells!=='undefined'&&bel
 window.__fitNo=function(){if(window.__fitUndo){Object.assign(APP,window.__fitUndo);rebuild();try{saveApp()}catch(e){}}window.__fitUndo=null;window.__fitPay=false;if(window.__drawCust)window.__drawCust()};
 const OPEN={cardigan:1,coat:1,vest:1,denim:1,bomber:1,jacket:1},ALIAS={hen:'henley',sail:'sailor',puff:'blouse',bib:'overalls',sleeveless:'tank',jacket:'coat',dress:'sundress'},SL={tank:0,vest:0,sundress:0,dress:0,overalls:1,tee:1,polo:1,crop:1,sailor:1,sail:1,blouse:1,puff:1,armor:1,layer:1,hoodie:2,cardigan:2,tunic:2,sweater:2,coat:2,henley:2,hen:2,bomber:2,denim:2,raglan:2,turtle:2,button:2,jacket:2,bib:1,sleeveless:0};
 function newBody(g,o){const u=g.ud;u.look=o;u.noEmote=!!o.noEmote;u.nb=1;const zf=k=>o[k]==null?0:+o[k],sk=o.col!==undefined?o.col:0xffdcb0,dk=(c,f)=>new T.Color(c).multiplyScalar(f).getHex(),T0=u.torso;
- const tx=1+zf('torsoW')*.16+zf('weight')*.1,tz=1+zf('weight')*.12,hip=1+zf('hip')*.16,mus=1+zf('weight')*.1,len=1+zf('limbLen')*.1;
- u.morph={sh:zf('shoulder'),hip:zf('hip')};
+ const shM=zf('shoulder'),tx=1+zf('torsoW')*.16+zf('weight')*.1+shM*.1,tz=1+zf('weight')*.12,hip=1+zf('hip')*.16,mus=1+zf('weight')*.1,len=1+zf('limbLen')*.1;
+ u.morph={sh:shM,hip:zf('hip')};
  let top=ALIAS[o.topStyle]||o.topStyle||'tee',outer=(o.outer&&o.outer!=='none')?(ALIAS[o.outer]||o.outer):null,under=(o.under&&o.under!=='none')?(ALIAS[o.under]||o.under):null;
  const remapped=OPEN[top]&&!outer;if(remapped){outer=top;top=under||'tee';under=null}
  let bot=o.botStyle||'pants';if(bot==='dress')bot='skirt';if(top==='sundress'||bot==='none')bot='none';
@@ -5939,7 +5939,13 @@ function newBody(g,o){const u=g.ud;u.look=o;u.noEmote=!!o.noEmote;u.nb=1;const z
  else if(scf==='bandana')mk(new T.BoxGeometry(.22,.1,.03),scc,T0,0,2.82,.2,5);
  else if(scf==='pendant')mk(new SP(.04,8,6),scc,T0,0,2.6,.24,5);
  const hs=1+zf('height')*.1;if(hs!==1)g.scale.y*=hs;const hd=1+zf('headScale')*.14;if(hd!==1&&u.head&&u.head.parent&&u.head.parent!==g)u.head.parent.scale.multiplyScalar(hd)}
-function mkHuman(look){const o=Object.assign({kind:'human'},look||{});if(o.s==null)o.s=.74;const g=chibi(o);try{if(window.decorate)window.decorate(g)}catch(e){}return g}
+function mkHuman(look){
+ const src=(typeof pl!=='undefined'&&pl&&pl.ud&&pl.ud.look)||(typeof APP!=='undefined'?APP:null);
+ const o=Object.assign({kind:'human'},look||{});
+ // Same species build as the player. Clothes stay on the look; only proportion keys fill in when missing.
+ if(src&&src!==look){['build','shoulder','hip','weight','torsoW','height','limbLen','headScale','neckW'].forEach(k=>{if(o[k]==null&&src[k]!=null)o[k]=src[k]})}
+ if(o.s==null)o.s=src&&src.s!=null?src.s:.74;
+ const g=chibi(o);try{if(window.decorate)window.decorate(g)}catch(e){}return g}
 window.mkHuman=mkHuman;
 chibi=function(o){const g=_ch(o);if(o&&o.kind==='human'&&g.ud){g.ud.look=o;if(g.ud.torso&&g.ud.legL){try{newBody(g,o)}catch(e){console.warn('body',e)}}}return g}}
 // ===== CHARACTER PASS: biomechanical gait, idle life, secondary motion, joint detail, footstep dust =====
@@ -5998,7 +6004,7 @@ animChar=function(g,t,arms){_ac(g,t,arms);const u=g.ud;if(!u||!u.isHuman||!u.leg
  if(u.earL)u.earL.rotation.x=J('er',-.12*wk*Math.sin(2*ph-.6),8);if(u.earR)u.earR.rotation.x=u.earL?u.earL.rotation.x:0;if(u.tail)u.tail.rotation.y+=.2*wk*Math.sin(ph)};
 const _uu=update;update=function(dt){_uu(dt);dust.forEach(m=>{if(!m.visible)return;m.a-=dt*1.1;m.scale.multiplyScalar(1+dt*1.6);m.position.y+=dt*.3;m.material.opacity=Math.max(0,m.a);if(m.a<=0)m.visible=false})}}
 // Mabel — human NPC on the same mkHuman pipeline as the player, stood beside them for a silhouette compare.
-{const look=window.applySet?window.applySet({s:.82,noEmote:true,col:0xf3c7a0,hair:0x6b3a2a,hs:'pony',bangs:'swept',eyes:'almond',eyec:0x4a2f1a,brows:'soft',mouth:'smile',blush:'soft',build:'classic',ears:'human'},'tailor'):null;
+{const look=window.applySet?window.applySet({noEmote:true,col:0xf3c7a0,hair:0x6b3a2a,hs:'pony',bangs:'swept',eyes:'almond',eyec:0x4a2f1a,brows:'soft',mouth:'smile',blush:'soft',ears:'human'},'tailor'):null;
  if(look&&window.mkHuman&&pl){pl.position.set(P.x,0,P.z);const m=window.mkHuman(look);m.position.set(pl.position.x+1.7,0,pl.position.z+.25);m.rotation.y=P.a+Math.PI;S.add(m);window.MABEL=m;try{lab('Mabel 🧵',m.position.x,3.1,m.position.z)}catch(e){}
   const _uM=update;update=function(dt){_uM(dt);if(!window.MABEL||(typeof IN!=='undefined'&&IN))return;const q=window.MABEL;q.rotation.y=Math.atan2(P.x-q.position.x,P.z-q.position.z);try{animChar(q,tm,true)}catch(e){}}}}
 {const _uH=update;update=function(dt){_uH(dt);const h=window.HOME_G;if(!h||(typeof IN!=='undefined'&&IN))return;const d=Math.hypot(C.position.x-h.position.x,C.position.z-h.position.z),fade=Math.max(0,Math.min(1,(7.4-d)/3.6));
