@@ -1976,27 +1976,25 @@ const K={},joy={x:0,y:0};
  // Inject Studio CSS
  const stEl=document.createElement('style');
  stEl.textContent=`
-  #cust{width:min(96vw,980px)!important;max-height:min(94vh,900px)!important;padding:12px 12px 10px!important}
-  #cust .studio-top{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start;background:linear-gradient(180deg,#d8f3ff,#fff8e1);border:3px solid #e3c987;border-radius:18px;padding:8px;margin:0 0 8px}
-  #cust #cust-cv{flex:1 1 280px;width:min(46vw,520px);height:min(56vh,640px);max-width:100%;border-radius:16px;background:radial-gradient(circle at 50% 32%,#fff,#c5e8ff 62%,#9ad7a4 100%);border:2px solid #fff;box-shadow:inset 0 2px 8px rgba(0,0,0,.12);cursor:grab;touch-action:none}
+  #cust[style*="block"]{display:flex!important;flex-direction:column;overflow:hidden!important;padding:8px!important;height:min(94vh,900px)!important}
+  #cust .studio-stage{position:relative;flex:0 0 58%;height:58%;min-height:0;margin:0 0 8px}
+  #cust #cust-cv{width:100%;height:100%;display:block;border-radius:22px;background:radial-gradient(circle at 50% 32%,#fff,#c5e8ff 62%,#9ad7a4 100%);border:2px solid #fff;box-shadow:inset 0 2px 8px rgba(0,0,0,.12);cursor:grab;touch-action:none}
+  #cust .icon-stack{position:absolute;right:8px;top:8px;display:flex;flex-direction:column;gap:6px;z-index:3}
+  #cust .icon-stack button{width:40px;height:40px;padding:0;border-radius:50%;font-size:16px;background:#fffdf6}
+  #cust .icon-stack #ux{position:static!important;width:40px!important;height:40px!important}
+  #cust .emote-pop{position:absolute;right:54px;top:8px;display:flex;flex-direction:column;gap:4px;z-index:3;background:#fffdf6;border:2px solid #e3c987;border-radius:16px;padding:6px}
+  #cust .emote-pop[hidden]{display:none}
+  #cust .emote-pop button{min-height:36px;padding:6px 10px;border-radius:12px;background:#fff;text-align:left;white-space:nowrap}
+  #cust .emote-pop button.act{background:#7cc576;color:#fff;border-color:#4f9a4a}
+  #cust .tip{position:absolute;left:10px;bottom:10px;max-width:70%;background:#fffdf6;border:2px solid #e3c987;border-radius:12px;padding:6px 8px;font-size:12px;z-index:3}
+  #cust .tip[hidden]{display:none}
   #cust .sld{width:100%;accent-color:#7cc576;margin:0 0 8px;height:28px}
-  #cust .studio-bar{flex:0 0 auto;display:flex;flex-direction:column;gap:6px}
-  #cust .studio-bar .tool{min-height:40px;padding:8px 12px;font-size:14px;border-radius:14px;background:#fffdf6}
-  #cust .emote-row{flex:1 0 100%;display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;-webkit-overflow-scrolling:touch}
-  #cust .emote-row[hidden]{display:none}
-  #cust .emote-row button{flex:0 0 auto;min-height:40px;font-size:14px;padding:8px 12px;border-radius:14px;border:2px solid #fff;background:#fffdf6;cursor:pointer}
-  #cust .emote-row button.act{background:#7cc576;color:#fff;border-color:#4f9a4a}
-  #cust .ctabs{display:flex;gap:6px;overflow-x:auto;margin:0 0 8px;padding-bottom:2px;-webkit-overflow-scrolling:touch}
-  #cust .ctabs button{flex:0 0 auto;min-height:40px;padding:8px 14px;font-size:14px;border-radius:999px;border:2px solid #e3c987;background:#fff;box-shadow:none;cursor:pointer}
+  #cust .ctabs{display:flex;flex:0 0 auto;gap:6px;overflow-x:auto;margin:0 0 8px;padding-bottom:2px;-webkit-overflow-scrolling:touch}
+  #cust .ctabs button{flex:0 0 auto;min-height:36px;padding:6px 12px;font-size:14px;border-radius:999px;border:2px solid #e3c987;background:#fff;box-shadow:none}
   #cust .ctabs button.on{background:#2e6b29;border-color:#2e6b29;color:#fff}
-  #cust .cbody{max-height:34vh;overflow-y:auto;padding-right:2px;touch-action:pan-y}
-  @media(max-width:720px){
-   #cust .studio-top{flex-direction:column}
-   #cust #cust-cv{flex:0 0 auto;width:100%;height:46vh;min-height:300px}
-   #cust .studio-bar{flex-direction:row;width:100%}
-   #cust .studio-bar .tool{flex:1}
-   #cust .cbody{max-height:28vh}
-  }
+  #cust .cbody{flex:1 1 auto;min-height:0;overflow-y:auto;padding-right:2px;touch-action:pan-y}
+  #cust .emote-row{display:flex;gap:6px;margin-top:6px}
+  @media(max-width:720px){#cust .tip{display:none!important}}
   #cust .cl{font-size:12px;font-weight:700;margin:8px 0 4px;color:#6b4a2b;display:flex;justify-content:space-between;align-items:center}
   #cust .cr{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:4px}
   #cust .sw{width:26px;height:26px;padding:0;border-radius:50%;border:2.5px solid #fff;cursor:pointer}
@@ -2009,7 +2007,7 @@ const K={},joy={x:0,y:0};
  let pScene=null,pCam=null,pRen=null,pChar=null,pPed=null;
  function sizePreview(){
   const cv=cu.querySelector('#cust-cv');if(!cv||!pRen||!pCam)return;
-  const r=cv.getBoundingClientRect(),W=Math.max(300,Math.round(r.width||innerWidth*.46)),H=Math.max(340,Math.round(r.height||innerHeight*.52));
+  const r=cv.getBoundingClientRect(),W=Math.max(2,Math.round(r.width)),H=Math.max(2,Math.round(r.height));
   pRen.setSize(W,H,false);pCam.aspect=W/Math.max(1,H);pCam.updateProjectionMatrix();
  }
  function initPreview(cv){
@@ -2069,13 +2067,14 @@ const K={},joy={x:0,y:0};
  }).join('')+'</div>';
 
  const MORPHS=[['jawW','Jaw width'],['jawH','Jaw height'],['cheek','Cheek fullness'],['cheekH','Cheekbone height'],['cheekW','Cheekbone width'],['chin','Chin'],['chinLen','Chin length'],['chinPos','Chin position'],['chinW','Chin width'],['chinSh','Chin shape'],['browY','Brow height'],['browW','Brow width'],['eyeGap','Eye spacing'],['eyeSize','Eye size'],['eyeLid','Eyelid'],['noseS','Nose size'],['noseW','Nose width'],['noseH','Nose height'],['noseLen','Nose length'],['noseBridge','Nose bridge'],['noseTip','Nose tip'],['lipW','Lip width'],['lipFull','Lip fullness'],['neckW','Neck width'],['height','Height'],['shoulder','Shoulders'],['hip','Hips'],['weight','Weight'],['limbLen','Limb length'],['torsoW','Torso width'],['headScale','Head size']];
- function sculptSliders(){const look=window.__editLook||APP;return '<div class="cl"><span>Structure sliders write this look. 0 is neutral (nose size is 1).</span></div>'+MORPHS.map(([k,lab])=>{const nose=k==='noseS',v=look[k]==null?(nose?1:0):look[k];return '<div class="cl"><span>'+lab+'</span><b data-sv="'+k+'">'+Number(v).toFixed(2)+'</b></div><input class="sld" data-k="'+k+'" type="range" min="'+(nose?.6:-1)+'" max="'+(nose?1.6:1)+'" step="0.02" value="'+v+'">'}).join('')}
+ function sculptSliders(){const look=window.__editLook||APP;return MORPHS.map(([k,lab])=>{const nose=k==='noseS',v=look[k]==null?(nose?1:0):look[k];return '<div class="cl"><span>'+lab+'</span><b data-sv="'+k+'">'+Number(v).toFixed(2)+'</b></div><input class="sld" data-k="'+k+'" type="range" min="'+(nose?.6:-1)+'" max="'+(nose?1.6:1)+'" step="0.02" value="'+v+'">'}).join('')}
  const draw=()=>{
+  if(ctab==='top'||ctab==='bot')ctab='clothes';
+  if(ctab==='acc'||ctab==='bag'||ctab==='sculpt')ctab='more';
   const scEl=cu.querySelector('.cbody'),st=scEl?scEl.scrollTop:0;
   let bodyHtml='';
   if(ctab==='face'){
    bodyHtml=
-    row('📏 Body Build & Height','build',BUILD)+
     row('🎨 Skin Tone (12 Shades)','col',SK,1)+
     row('👂 Ears & Headbands','ears',EARS)+
     row('👀 Eye Shape & Expression','eyes',ES)+
@@ -2138,8 +2137,46 @@ const K={},joy={x:0,y:0};
     PRESETS.map((p,i)=>'<div class="pcard"><b>'+p[0]+'</b><button data-preset="'+i+'">Wear Look ✨</button></div>').join('')+
     '<div class="cl"><span>💾 Custom Wardrobe Save Slots</span></div>'+
     slots.map((s,i)=>'<div class="pcard"><span><b>Outfit Slot '+(i+1)+'</b> '+(s?'✅ Saved':'(Empty)')+'</span><div><button data-ssave="'+i+'">Save</button> '+(s?'<button data-sload="'+i+'">Wear</button>':'')+'</div></div>').join('');
-  }else if(ctab==='sculpt'){
-   bodyHtml=sculptSliders();
+  }else if(ctab==='clothes'){
+   bodyHtml=
+    row('👕 Top','topStyle',TOPS)+
+    row('👕 Under layer','under',[['none','None'],['tee','Tee'],['turtle','Turtleneck'],['blouse','Blouse'],['button','Shirt']])+
+    row('🎨 Under color','underC',CL,1)+
+    row('🧥 Outer layer','outer',[['none','None'],['cardigan','Cardigan'],['coat','Peacoat'],['vest','Vest'],['denim','Denim'],['bomber','Bomber']])+
+    row('🎨 Outer color','outerC',CL,1)+
+    row('🎨 Shirt Pattern / Crest','pat',PAT)+
+    row('🎨 Primary Top Color','shirt',CL,1)+
+    row('🎨 Inner Shirt / Pattern Color','shirt2',CL,1)+
+    row('🧣 Neckwear & Scarves','scarf',SCARF)+
+    row('🎨 Neckwear Color','scarfc',CL,1)+
+    row('👖 Bottoms & Skirts','botStyle',BOTS)+
+    row('🎨 Bottoms / Overalls Color','pants',CL,1)+
+    row('🧦 Socks & Stockings','sock',SOCK)+
+    row('🎨 Sock Color','sockc',CL,1)+
+    row('👟 3D Footwear Style','shoeStyle',SHOES)+
+    row('🎨 Shoe Main Color','shoe',CL,1)+
+    row('🎨 Shoe Sole / Trim Color','shoe2',CL,1);
+  }else if(ctab==='more'){
+   bodyHtml=
+    row('🎩 3D Hats & Headwear','at',AT)+
+    row('🎨 Hat / Ribbon Color','acc',CL,1)+
+    row('👓 Eyewear & Shades','gl',GL)+
+    row('🎨 Frame Color','glc',CL,1)+
+    row('💎 Earrings','earring',EARR)+
+    row('👂 Lobe piercing','lobe',[['none','None'],['stud','Stud'],['hoop','Hoop']])+
+    row('👂 Helix','helix',[['none','None'],['stud','Stud'],['ring','Ring']])+
+    row('👃 Nose','nosePierce',[['none','None'],['stud','Stud'],['ring','Ring']])+
+    row('🤨 Brow','browPierce',[['none','None'],['stud','Stud'],['bar','Bar']])+
+    row('👄 Lip','lipPierce',[['none','None'],['stud','Stud'],['ring','Ring']])+
+    row('✨ Metal','pierceC',[0xf2c94c,0xe8e8e8,0xb87333,0x222222],1)+
+    row('🎒 Backpacks, Wings & Capes','bag',BAGS)+
+    row('🎨 Backpack / Wing / Cape Color','bagc',CL,1)+
+    '<div class="cl"><span>🎭 Curated looks</span></div>'+
+    PRESETS.map((p,i)=>'<div class="pcard"><b>'+p[0]+'</b><button data-preset="'+i+'">Wear Look ✨</button></div>').join('')+
+    '<div class="cl"><span>💾 Wardrobe slots</span></div>'+
+    slots.map((s,i)=>'<div class="pcard"><span><b>Outfit Slot '+(i+1)+'</b> '+(s?'✅ Saved':'(Empty)')+'</span><div><button data-ssave="'+i+'">Save</button> '+(s?'<button data-sload="'+i+'">Wear</button>':'')+'</div></div>').join('')+
+    row('📏 Body Build & Height','build',BUILD)+
+    sculptSliders();
   }else if(ctab==='sets'){
    const sets=window.CLOTHING_SETS||[],cat=s=>s.cat||(/sleep|night/.test(s.id)?'sleep':/sport|runner/.test(s.id)?'sport':/rain|snow|winter/.test(s.id)?'weather':/evening|office|royal|maid/.test(s.id)?'formal':/apron|jumpsuit|cowboy|hike|fisher|chef|island/.test(s.id)?'work':/sundress|floral|festival|kimono|picnic/.test(s.id)?'dress':/armor/.test(s.id)?'armor':'casual'),f=window.__setFilter||'all',cats=['all','casual','work','formal','dress','weather','sport','sleep','armor'];
    bodyHtml='<div class="filters">'+cats.map(c=>'<button data-sf="'+c+'" class="'+(f===c?'on':'')+'">'+c+'</button>').join('')+'</div><div class="cl"><span>'+sets.filter(s=>f==='all'||cat(s)===f).length+' looks</span></div>'+sets.filter(s=>f==='all'||cat(s)===f).map(s=>'<div class="pcard"><b>'+s.n+'</b><button data-set="'+s.id+'">Try on</button></div>').join('');
@@ -2147,39 +2184,50 @@ const K={},joy={x:0,y:0};
 
   const fit=window.__fitUndo?'<div class="emote-row" style="margin-top:6px"><button data-fitok="1">Keep'+(window.__fitPay?' · 150 🔔':'')+'</button><button data-fitno="1">Cancel try-on</button></div>':'';
   const tabs=`<div class="ctabs">
-    <button data-ct="face" class="${ctab==='face'?'on':''}">👤 Face</button>
-    <button data-ct="sculpt" class="${ctab==='sculpt'?'on':''}">🎚️ Sculpt</button>
-    <button data-ct="hair" class="${ctab==='hair'?'on':''}">💇 Hair</button>
-    <button data-ct="sets" class="${ctab==='sets'?'on':''}">👗 Sets</button>
-    <button data-ct="top" class="${ctab==='top'?'on':''}">👕 Layers</button>
-    <button data-ct="bot" class="${ctab==='bot'?'on':''}">👖 Bottoms</button>
-    <button data-ct="acc" class="${ctab==='acc'?'on':''}">🎩 Hats</button>
-    <button data-ct="bag" class="${ctab==='bag'?'on':''}">🎒 Bags</button>
+    <button data-ct="face" class="${ctab==='face'?'on':''}">Face</button>
+    <button data-ct="hair" class="${ctab==='hair'?'on':''}">Hair</button>
+    <button data-ct="sets" class="${ctab==='sets'?'on':''}">Sets</button>
+    <button data-ct="clothes" class="${ctab==='clothes'?'on':''}">Clothes</button>
+    <button data-ct="more" class="${ctab==='more'?'on':''}">More</button>
    </div>
-   <div class="cbody">${bodyHtml}</div>${fit}<button id="ux">✕</button>`;
+   <div class="cbody">${bodyHtml}</div>${fit}`;
   if(!cu.querySelector('#cust-cv')){
-   cu.innerHTML=`<h3>Wardrobe</h3>
-   <div class="studio-top">
-    <canvas id="cust-cv" title="Drag to spin"></canvas>
-    <div class="studio-bar">
-     <button class="tool" data-zoom="1">${zoomFace?'Full':'Face'}</button>
-     <button class="tool" data-em-open="1">Emotes</button>
-     <button class="tool" data-rand="1" title="Randomize look">🎲</button>
+   cu.innerHTML=`<div class="studio-stage">
+    <canvas id="cust-cv" title="Drag to spin. Double-tap for the face."></canvas>
+    <div class="icon-stack">
+     <button id="ux" title="Close">✕</button>
+     <button data-em-open="1" title="Emotes">⋯</button>
+     <button data-rand="1" title="Randomize">🎲</button>
     </div>
-    <div class="emote-row" hidden>
+    <div class="emote-pop" hidden>
      <button data-em="wave">👋 Wave</button>
      <button data-em="dance">💃 Dance</button>
      <button data-em="joy">✨ Joy</button>
      <button data-em="pose">😎 Pose</button>
      <button data-em="spin">🌸 Spin</button>
     </div>
+    <div class="tip" hidden>Drag to turn. Double-tap for the face.</div>
    </div><div id="cust-dyn">${tabs}</div>`;
    const cv=cu.querySelector('#cust-cv');
    initPreview(cv);
-   cv.addEventListener('pointerdown',e=>{dragging=true;lastX=e.clientX;try{cv.setPointerCapture(e.pointerId)}catch(_){}});
-   cv.addEventListener('pointermove',e=>{if(!dragging)return;rotY+=(e.clientX-lastX)*.012;lastX=e.clientX});
-   cv.addEventListener('pointerup',()=>dragging=false);
-   cv.addEventListener('pointercancel',()=>dragging=false);
+   const ptrs=new Map();let pinchD=0,lastTap=0;
+   const pinch=()=>{const p=[...ptrs.values()];return p.length<2?0:Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y)};
+   cv.addEventListener('pointerdown',e=>{
+    ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    const now=performance.now();
+    if(ptrs.size===1&&now-lastTap<280){zoomFace=!zoomFace;lastTap=0}else if(ptrs.size===1)lastTap=now;
+    dragging=ptrs.size===1;lastX=e.clientX;if(ptrs.size===2){pinchD=pinch();dragging=false}
+    try{cv.setPointerCapture(e.pointerId)}catch(_){}
+   });
+   cv.addEventListener('pointermove',e=>{
+    if(!ptrs.has(e.pointerId))return;
+    ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(ptrs.size>=2){const d=pinch();if(pinchD){if(d<pinchD*.72)zoomFace=true;else if(d>pinchD*1.35)zoomFace=false}return}
+    if(!dragging)return;rotY+=(e.clientX-lastX)*.012;lastX=e.clientX;
+   });
+   const up=e=>{ptrs.delete(e.pointerId);if(ptrs.size<2)pinchD=0;dragging=ptrs.size===1};
+   cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
+   try{if(!matchMedia('(max-width:720px)').matches&&!localStorage.getItem('pi_studio_tip')){const tip=cu.querySelector('.tip');if(tip){tip.hidden=false;localStorage.setItem('pi_studio_tip','1');setTimeout(()=>{tip.hidden=true},3400)}}}catch(e){}
   }else cu.querySelector('#cust-dyn').innerHTML=tabs;
   const nSc=cu.querySelector('.cbody');if(nSc)nSc.scrollTop=st;
   rebuildPreviewModel();sizePreview();
@@ -2196,11 +2244,11 @@ const K={},joy={x:0,y:0};
   const b=e.target.closest('button');if(!b)return;
   if(b.id==='ux'){cu.style.display='none';return}
   if(b.dataset.ct){ctab=b.dataset.ct;draw();return}
-  if(b.dataset.zoom){zoomFace=!zoomFace;b.textContent=zoomFace?'Full':'Face';return}
-  if(b.dataset.emOpen){const row=cu.querySelector('.emote-row');if(row)row.hidden=!row.hidden;b.classList.toggle('on',row&&!row.hidden);return}
+  if(b.dataset.emOpen){const row=cu.querySelector('.emote-pop');if(row)row.hidden=!row.hidden;b.classList.toggle('on',row&&!row.hidden);return}
   if(b.dataset.em){
    window.PI_EMOTE={type:b.dataset.em,t:3.2};
    cu.querySelectorAll('[data-em]').forEach(x=>x.classList.toggle('act',x===b));
+   const row=cu.querySelector('.emote-pop');if(row)row.hidden=true;
    ding();return;
   }
   if(b.dataset.rand){
@@ -5905,7 +5953,7 @@ function newBody(g,o){const u=g.ud;u.look=o;u.noEmote=!!o.noEmote;u.nb=1;const z
  if(top==='overalls'){mk(new T.BoxGeometry(.32,.36,.045),pc,T0,0,2.26,.23,3);[-1,1].forEach(s=>{mk(new T.BoxGeometry(.05,.46,.035),pc,T0,s*.13,2.55,.18,3);mk(new SP(.02,8,6),0xf2c94c,T0,s*.13,2.38,.22,4)});mk(new T.BoxGeometry(.12,.08,.02),t2,T0,0,2.2,.26,4)}
  if(top==='sailor'){mk(new T.BoxGeometry(.52,.045,.3),t2,T0,0,2.72,-.06,3).rotation.x=.35;[-1,1].forEach(s=>mk(new T.BoxGeometry(.14,.24,.03),t2,T0,s*.14,2.55,.16,3));mk(new SP(.04,8,6),0xe53935,T0,0,2.48,.24,4)}
  if(outer){tube(T0,grow(1.18),pmap?0xffffff:outCol,18,0,0,0,5,pmap,OPEN[outer]?.62:0);if(OPEN[outer])[-1,1].forEach(s=>{const lap=mk(new T.BoxGeometry(.05,.42,.02),dk(outCol,.82),T0,s*.22,2.45,.2,7);lap.rotation.y=s*.55});
-  if(outer==='coat'||outer==='cardigan')tube(T0,[[1.42,.4*tx,.3*tz],[1.58,.38*tx,.28*tz],[1.76,.36*tx,.26*tz]],pmap?0xffffff:outCol,16,0,0,0,6,pmap,.5)}
+  if(outer==='coat'||outer==='cardigan'){const seam=mk(new T.TorusGeometry(.32*tx,.014,8,22),dk(outCol,.72),T0,0,1.86,0,6);seam.rotation.x=Math.PI/2;seam.scale.z=.68;tube(T0,[[1.46,.38*tx,.28*tz],[1.62,.36*tx,.26*tz],[1.78,.34*tx,.24*tz]],pmap?0xffffff:outCol,16,0,0,0,6,pmap,.45)}}
  if(top==='hoodie'||outer==='hoodie'){const hc=top==='hoodie'?topCol:outCol;tube(T0,[[2.72,.24,.18],[3.05,.4,.32],[3.38,.42,.34],[3.62,.26,.2],[3.76,.12,.09]],hc,16,0,0,-.08,6,null,.9);[-1,1].forEach(s=>mk(new T.CylinderGeometry(.012,.01,.18,5),t2,T0,s*.05,2.78,.18,7));mk(new T.BoxGeometry(.34,.16,.04),dk(hc,.84),T0,0,2.08,.24,7)}
  if(top==='polo'||top==='button'){const colr=mk(new T.TorusGeometry(.115,.028,6,14),dk(topCol,.82),T0,0,2.96,0,3);colr.rotation.x=Math.PI/2}
  if(['pants','jeans','cargopants','joggers'].includes(bot)&&top!=='sundress'){const belt=mk(new T.TorusGeometry(.3,.018,6,16),0x3a2a1c,T0,0,1.9,0,4);belt.rotation.x=Math.PI/2;belt.scale.z=.72;mk(new T.BoxGeometry(.06,.04,.02),0xf2c94c,T0,0,1.9,.2,5)}
@@ -6060,14 +6108,15 @@ newDay();hud();say(loan>0?'Welcome to Pocket Island! Nook is waiting to be paid 
 /* ---- every window: same centered book-page card ---- */
 #craft,#dex,#cust,#nemp,#petp,#artp,#seedp,#nb,#bag{position:fixed;z-index:20;left:50%!important;top:50%!important;right:auto!important;bottom:auto!important;transform:translate(-50%,-50%)!important;width:min(92vw,440px)!important;max-height:min(82vh,640px)!important;overflow:auto;box-sizing:border-box;padding:16px 16px 14px;border:4px solid var(--wood);background:var(--paper);color:var(--ink2);border-radius:26px;box-shadow:0 8px 0 rgba(90,70,50,.28);touch-action:pan-y}
 #cust{z-index:40!important;width:min(96vw,980px)!important;max-height:min(94vh,900px)!important}
-#cust #cust-cv{width:min(46vw,520px)!important;height:min(56vh,640px)!important}
+#cust[style*="block"]{height:min(94vh,900px)!important}
+#cust #cust-cv{width:100%!important;height:100%!important}
 #cust .filters{display:flex;flex-wrap:nowrap;gap:6px;margin:2px 0 8px;overflow-x:auto;-webkit-overflow-scrolling:touch}
 #cust .filters button{flex:0 0 auto;min-height:36px;font-size:14px;padding:6px 12px;border-radius:999px;background:#fff}
 #cust .filters button.on{background:#2e6b29;border-color:#2e6b29;color:#fff}
 @media(max-width:720px){
- #cust{width:min(96vw,560px)!important;max-height:min(96vh,920px)!important;padding:10px!important}
- #cust #cust-cv{flex:0 0 auto!important;width:100%!important;height:46vh!important;min-height:300px!important}
- #cust h3{font-size:17px}
+ #cust{width:min(96vw,560px)!important;max-height:min(96vh,920px)!important;padding:8px!important}
+ #cust[style*="block"]{height:min(96vh,920px)!important}
+ #cust #cust-cv{width:100%!important;height:100%!important;min-height:0!important}
 }
 #nemp,#petp{width:min(94vw,520px)!important}
 #nb,#bag{display:none}
