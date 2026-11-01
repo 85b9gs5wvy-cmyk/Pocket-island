@@ -1336,17 +1336,30 @@ function refFace(ou,o,MS,u){
  const h=ou.head,kids=h.children.slice();
  if(ou.fcS!==undefined&&ou.fcE!==undefined)kids.slice(ou.fcS,ou.fcE).forEach(k=>h.remove(k));
  if(kids[0])kids[0].visible=false;
- const col=o.col!==undefined?o.col:0xffdcb0,skin=MS(col,.6),skinD=MS(new T.Color(col).multiplyScalar(.86).getHex(),.7),dk=MS(0x2a1a14,.7),
-  hairC=o.hair!==undefined?o.hair:0x4a3020,lipM=MS(new T.Color(col).lerp(new T.Color(0xc4565e),.45).getHex(),.5),eyes=[];
- // --- single sculpted head: cranium identical to the old skull (so hair/hats still fit), jaw tapers, chin comes forward
- const hg=new T.SphereGeometry(1,56,40);hg.rotateY(-Math.PI/2);const pa=hg.attributes.position,V=[],mf=k=>o[k]==null?0:+o[k],jaw=mf('jawW'),ck=mf('cheek'),chn=mf('chin');
- for(let i=0;i<pa.count;i++){const ux=pa.getX(i),uy=pa.getY(i),uz=pa.getZ(i);let x=ux*1.02,y=uy*.92,z=uz*.96;
-  if(uy<0){const t=-uy;x*=1-.34*Math.pow(t,1.3);y*=1.08;if(uz>0)z+=.1*Math.pow(t,1.5)*uz}
-  x*=1+.04*Math.exp(-Math.pow((y+.22)/.3,2));
-  if(uy<0.08){const t=Math.max(0,-uy);x*=1+jaw*.2*Math.min(1,t*1.35);
-   const cf=Math.exp(-Math.pow((uy+.12)/.22,2))*Math.exp(-Math.pow((Math.abs(ux)-.36)/.3,2));
-   x*=1+ck*.1*cf;if(uz>0)z+=ck*.05*cf;
-   if(uy<-.34){const c=Math.min(1,(-uy-.34)/.4);y-=chn*.07*c;if(uz>0)z+=chn*.05*c;x*=1-Math.max(0,chn)*.06*c}}
+ const col=o.col!==undefined?o.col:0xffdcb0,flesh=new T.Color(col),skin=MS(col,.42,.04,{emissive:flesh.clone().multiplyScalar(.07).getHex(),emissiveIntensity:.42}),skinD=MS(flesh.clone().multiplyScalar(.82).getHex(),.55,.02),dk=MS(0x2a1a14,.55),
+  hairC=o.hair!==undefined?o.hair:0x4a3020,lipBase=(o.makeup==='lipstick'||o.makeup==='glam')?0xb4233a:0xc4565e,lipM=MS(flesh.clone().lerp(new T.Color(lipBase),(o.makeup==='lipstick'||o.makeup==='glam')?.72:.48).getHex(),.38,.06),eyes=[];
+ // Hide the simple ear balls so the helix ears can read. Cranium radius stays ~1 so hair and hats still fit.
+ h.children.forEach(c=>{if(c.isMesh&&Math.abs(c.position.x)>.85&&Math.abs(c.position.y)<.12&&c.position.z<0.2)c.visible=false});
+ // --- denser head: brow ridge, sockets, cheekbones, jaw plane, chin, nose ridge, lip volume. Upper cranium stays put for hair.
+ const hg=new T.SphereGeometry(1,64,48);hg.rotateY(-Math.PI/2);const pa=hg.attributes.position,V=[],mf=k=>o[k]==null?0:+o[k],
+  jaw=mf('jawW'),jawH=mf('jawH'),ck=mf('cheek'),ckH=mf('cheekH'),ckW=mf('cheekW'),chn=mf('chin'),chinLen=mf('chinLen'),chinPos=mf('chinPos'),chinW=mf('chinW'),chinSh=mf('chinSh'),
+  browH=mf('browY')+mf('browH'),browW=mf('browW'),eyeLid=mf('eyeLid'),noseW=mf('noseW'),noseH=mf('noseH'),noseLen=mf('noseLen'),noseBridge=mf('noseBridge'),noseTip=mf('noseTip'),noseSc=o.noseS==null?1:+o.noseS,lipF=mf('lipFull'),neckW=mf('neckW');
+ for(let i=0;i<pa.count;i++){const ux=pa.getX(i),uy=pa.getY(i),uz=pa.getZ(i);let x=ux,y=uy*.97,z=uz*.98;const ax=Math.abs(ux),front=Math.max(0,uz);
+  if(uy>0.2){x*=1.02;z*=.99;if(uy<0.58&&ax>0.5)x*=.96}
+  const gau=(d,w)=>Math.exp(-(d*d)/(w*w));
+  const brow=gau(uy-.28,.1)*gau(ax,.42)*front;z+=.055*brow*(1+browH*.45);y+=.02*brow*browH;x*=1+browW*.07*gau(uy-.3,.12);
+  const socket=gau(uy-.05,.11)*gau(ax-.33,.13)*front;z-=.065*socket*(1+eyeLid*.35);
+  const bone=gau(uy+.02,.11)*gau(ax-.43,.15);x*=1+.055*bone*(1+ckW*.55);y+=.035*bone*ckH;if(uz>0)z+=.035*bone*(1+ck*.45);
+  if(uy<0.06&&uy>-.28)x*=1+ck*.07+ckW*.05;
+  if(uy<-.04){const t=Math.min(1,(-uy-.04)/.5);x*=1-.24*Math.pow(t,1.12);x*=1+jaw*.16*t;y-=jawH*.055*t;if(uz>0)z+=.055*Math.pow(t,1.25)*front}
+  const chinM=gau(uy+.5,.11)*gau(ax,.16)*front;z+=.045*chinM*(1+chn*.5+chinLen*.45);y-=chinLen*.05*gau(uy+.5,.14);y+=chinPos*.04*gau(uy+.48,.13);x*=1+chinW*.1*gau(uy+.46,.13);
+  if(uy<-.4)x*=1-Math.max(0,chinSh)*.1*gau(ax,.2);
+  const bridge=gau(ax,.075)*gau(uy+.02,.15)*front;z+=.065*bridge*noseSc*(1+noseBridge*.5+noseH*.3);
+  const tip=gau(ax,.085)*gau(uy+.2,.065)*front;z+=.055*tip*noseSc*(1+noseTip*.55+noseLen*.4);y-=noseLen*.028*tip;x*=1+noseW*.14*gau(uy+.16,.09)*gau(ax,.12);
+  const lip=gau(uy+.38,.055)*gau(ax,.18)*front;z+=.022*lip*(1+lipF*.85);
+  if(uy<-.62){x*=.74+neckW*.14;z*=.82+neckW*.06}
+  if(uy>.34){const r=Math.hypot(x,z)||1,cap=1.06;if(r>cap){x*=cap/r;z*=cap/r}}
+  x=Math.max(-1.2,Math.min(1.2,x));y=Math.max(-1.12,Math.min(1.12,y));z=Math.max(-1.15,Math.min(1.32,z));
   pa.setXYZ(i,x,y,z);if(z>0)V.push([x,y,z])}
  hg.computeVertexNormals();h.add(new T.Mesh(hg,skin));
  // height of the face surface at (x,y): weighted average of the nearest front vertices
@@ -1372,9 +1385,9 @@ function refFace(ou,o,MS,u){
  // --- nose: soft bridge, tip and wings blended into the face
  const ns=o.nose||'button',nz=o.noseS||1;
  if(ns==='triangle'){const n=new T.Mesh(new T.ConeGeometry(.09*nz,.2*nz,4),MS(0xe58a6a,.6));n.position.set(0,-.14,fz(0,-.14)+.02);n.rotation.x=.3;h.add(n)}
- else{const k=nz*((ns==='tiny'||ns==='bandaid')?.62:ns==='button'?.88:1);
-  on(skin,0,.0,.042*k,.17*k,.05*k,.0);on(skin,0,-.15,.07*k,.06*k,.065*k,.03*k);
-  [-1,1].forEach(s=>{on(skin,s*.055*k,-.165,.036*k,.034*k,.042*k,.0);on(dk,s*.032*k,-.2,.014,.01,.012,.02*k+.012)});
+ else{const k=nz*((ns==='tiny'||ns==='bandaid')?.62:ns==='button'?.88:1)*(1+(o.noseLen||0)*.25),nw=1+(o.noseW||0)*.35;
+  on(skin,0,.02+(o.noseH||0)*.04,.03*k,.16*k,.07*k,.0);on(skin,0,-.15-(o.noseLen||0)*.03,.075*k,.055*k*nw,.06*k,.035*k);
+  [-1,1].forEach(s=>{on(skin,s*.055*k*nw,-.165,.04*k,.032*k,.04*k,.0);on(dk,s*.034*k*nw,-.2,.016,.012,.014,.02*k+.01)});
   if(ns==='bandaid'){const b=new T.Mesh(new T.BoxGeometry(.26,.065,.03),MS(0xfff8ee,.9));b.position.set(0,-.12,fz(0,-.12)+.05);h.add(b)}}
  // --- lips sit INTO the face; mouth line follows its curve
  const mS=o.mouth||'smile',lW=1+(o.lipW||0)*.4,lF=1+(o.lipFull||0)*.5;
@@ -1401,6 +1414,13 @@ function refFace(ou,o,MS,u){
  else if(mk==='whiskers'){[-1,1].forEach(s=>[-.05,0,.05].forEach(k=>{const b=on(dk,s*.55,-.18+k,.1,.008,.008,.01,1);b.rotation.z=s*k*3}))}
  else if(mk==='mustache'){const hm=MS(hairC,.9);[-1,1].forEach(s=>on(hm,s*.09,-.275,.12,.036,.045,.012).rotation.z=-s*.2)}
  else if(mk==='beard')E(MS(hairC,.9),0,-.62,.32,.84,.42,.66);
+ if(o.makeup==='freckles'||o.makeup==='glam'){const fm=MS(0xb0724a,.85);[[-.28,-.12],[-.38,-.18],[-.2,-.2],[.28,-.12],[.4,-.16],[.18,-.2],[-.08,-.14],[.08,-.15]].forEach(q=>on(fm,q[0],q[1],.018,.018,.01,.004,1))}
+ if(mS==='smile'||mS==='grin')on(MS(0xfff4ee,.35),0,-.355,.1*lW,.012,.015,.004);
+ // Helix + lobe ears (old ear balls were hidden above)
+ [-1,1].forEach(s=>{const eg=new T.Group();eg.position.set(s*1.0,-.02,-.02);eg.rotation.y=s*1.15;h.add(eg);
+  const helix=new T.Mesh(new T.TorusGeometry(.15,.032,6,14,Math.PI*1.55),skin);helix.rotation.z=s*.2;eg.add(helix);
+  E(skinD,s*.02,.02,.03,.07,.1,.04,eg);E(skin,0,-.15,.02,.06,.08,.045,eg)});
+ if(['pony','long','wavy','braids','halfup','bob'].indexOf(o.hs)>=0){const hm=MS(hairC,.72);for(let i=0;i<6;i++){const strand=new T.Mesh(new T.CylinderGeometry(.018,.008,.62,5),hm);strand.position.set((i-2.5)*.1,-.5,-.62);strand.rotation.x=.4+(i%3)*.06;strand.rotation.z=(i-2.5)*.05;h.add(strand)}}
  return eyes}
 // ===== PALWORLD-STYLE HUMAN: ~6.5 heads tall, sculpted limbs/hands/feet, layered clothing. Set oldBody:true in APP for the old chibi body =====
 {const _ch=chibi;chibi=function(o){const og=_ch(o);return(o&&o.kind==='human'&&!o.oldBody)?palChar(o,og):og}}
@@ -1587,7 +1607,9 @@ const APP={
  topStyle:'cardigan',pat:'solid',shirt:0xf6a04d,shirt2:0xffffff,scarf:'none',scarfc:0xe85d5d,
  botStyle:'pants',pants:0x6b8cc7,sock:'ankle',sockc:0xffffff,shoeStyle:'sneaker',shoe:0x4a3020,shoe2:0xffffff,
  at:'bow',acc:0x3d8bd9,gl:'none',glc:0x2a2420,bag:'knapsack',bagc:0x9a6b3a,
- jawW:0,cheek:0,chin:0,browY:0,eyeGap:0,eyeSize:0,noseS:1,lipW:0,lipFull:0,
+ jawW:0,jawH:0,cheek:0,cheekH:0,cheekW:0,chin:0,chinLen:0,chinPos:0,chinW:0,chinSh:0,
+ browY:0,browW:0,eyeGap:0,eyeSize:0,eyeLid:0,noseS:1,noseW:0,noseH:0,noseLen:0,noseBridge:0,noseTip:0,
+ lipW:0,lipFull:0,neckW:0,makeup:'none',
  height:0,shoulder:0,hip:0,weight:0,limbLen:0,torsoW:0,headScale:0,under:'none',outer:'none'
 };
 try{Object.assign(APP,JSON.parse(localStorage.getItem('pi_app')||'{}'))}catch(e){}
@@ -1871,7 +1893,7 @@ const K={},joy={x:0,y:0};
 
  const BOTS=[['pants','👖 Trousers'],['shorts','🩳 Island Shorts'],['skirt','👗 Pleated Skirt'],['longskirt','💃 Maxi Skirt'],['cargo','🏕️ Cargo Shorts'],['leggings','🧘 Leggings'],['jeans','👖 Denim Jeans'],['joggers','🏃 Joggers'],['cargopants','🎒 Cargo Pants'],['flared','🎸 Flared Jeans'],['capri','🩳 Capri'],['hotpants','🔥 Short Shorts'],['mini','💃 Mini Skirt'],['plaid','🏫 Plaid Skirt'],['pencil','👗 Pencil Skirt']];
  const SOCK=[['none','None'],['ankle','Ankle'],['crew','Crew'],['kneehigh','Knee-High'],['striped','Striped']];
- const SHOES=[['sneaker','👟 Sneakers'],['boots','🥾 Leather Boots'],['maryjane','🥿 Mary Janes'],['rainboot','🌧️ Rain Boots'],['loafer','👞 Loafers'],['sandal','🩴 Sandals'],['flats','🥿 Ballet Flats']];
+ const SHOES=[['sneaker','👟 Sneakers'],['boots','🥾 Leather Boots'],['heel','👠 Heels'],['maryjane','🥿 Mary Janes'],['rainboot','🌧️ Rain Boots'],['loafer','👞 Loafers'],['sandal','🩴 Sandals'],['flats','🥿 Ballet Flats']];
 
  const AT=[
   ['none','None'],['bow','🎀 Hair Bow'],['cap','🧢 Baseball Cap'],['straw','👒 Straw Sunhat'],
@@ -1989,6 +2011,8 @@ const K={},joy={x:0,y:0};
   return '<button data-k="'+k+'" data-v="'+v+'" class="'+(sw?'sw ':'')+(APP[k]===v?'on':'')+'"'+(sw?' style="background:'+hx(x)+'"':'')+'>'+lbl+'</button>';
  }).join('')+'</div>';
 
+ const MORPHS=[['jawW','Jaw width'],['jawH','Jaw height'],['cheek','Cheek fullness'],['cheekH','Cheekbone height'],['cheekW','Cheekbone width'],['chin','Chin'],['chinLen','Chin length'],['chinPos','Chin position'],['chinW','Chin width'],['chinSh','Chin shape'],['browY','Brow height'],['browW','Brow width'],['eyeGap','Eye spacing'],['eyeSize','Eye size'],['eyeLid','Eyelid'],['noseS','Nose size'],['noseW','Nose width'],['noseH','Nose height'],['noseLen','Nose length'],['noseBridge','Nose bridge'],['noseTip','Nose tip'],['lipW','Lip width'],['lipFull','Lip fullness'],['neckW','Neck width'],['height','Height'],['shoulder','Shoulders'],['hip','Hips'],['weight','Weight'],['limbLen','Limb length'],['torsoW','Torso width'],['headScale','Head size']];
+ function sculptSliders(){const look=window.__editLook||APP;return '<div class="cl"><span>Structure sliders write this look. 0 is neutral (nose size is 1).</span></div>'+MORPHS.map(([k,lab])=>{const nose=k==='noseS',v=look[k]==null?(nose?1:0):look[k];return '<div class="cl"><span>'+lab+'</span><b data-sv="'+k+'">'+Number(v).toFixed(2)+'</b></div><input class="sld" data-k="'+k+'" type="range" min="'+(nose?.6:-1)+'" max="'+(nose?1.6:1)+'" step="0.02" value="'+v+'">'}).join('')}
  const draw=()=>{
   const scEl=cu.querySelector('.cbody'),st=scEl?scEl.scrollTop:0;
   let bodyHtml='';
@@ -2004,7 +2028,9 @@ const K={},joy={x:0,y:0};
     row('👃 Nose Shape','nose',NOSE)+
     row('👄 Mouth & Expression','mouth',MOUTH)+
     row('😊 Cheek Blush','blush',BLUSH)+
-    row('✨ Face Markings & Beard','mark',MARK);
+    row('✨ Face Markings & Beard','mark',MARK)+
+    row('💄 Makeup','makeup',[['none','None'],['lipstick','Lipstick'],['freckles','Freckles'],['glam','Glam']])+
+    sculptSliders();
   }else if(ctab==='hair'){
    bodyHtml=
     row('💇‍♀️ 3D Hairstyle (18 Styles)','hs',HS)+
@@ -2049,9 +2075,7 @@ const K={},joy={x:0,y:0};
     '<div class="cl"><span>💾 Custom Wardrobe Save Slots</span></div>'+
     slots.map((s,i)=>'<div class="pcard"><span><b>Outfit Slot '+(i+1)+'</b> '+(s?'✅ Saved':'(Empty)')+'</span><div><button data-ssave="'+i+'">Save</button> '+(s?'<button data-sload="'+i+'">Wear</button>':'')+'</div></div>').join('');
   }else if(ctab==='sculpt'){
-   const SL=[['jawW','Jaw width'],['cheek','Cheeks'],['chin','Chin'],['browY','Brow height'],['eyeGap','Eye spacing'],['eyeSize','Eye size'],['noseS','Nose size'],['lipW','Lip width'],['lipFull','Lip fullness'],['height','Height'],['shoulder','Shoulders'],['hip','Hips'],['weight','Weight'],['limbLen','Limb length'],['torsoW','Torso width'],['headScale','Head size']];
-   const look=window.__editLook||APP;
-   bodyHtml='<div class="cl"><span>Sliders write this look. 0 is the cozy default (nose is 1).</span></div>'+SL.map(([k,lab])=>{const nose=k==='noseS',v=look[k]==null?(nose?1:0):look[k];return '<div class="cl"><span>'+lab+'</span><b data-sv="'+k+'">'+Number(v).toFixed(2)+'</b></div><input class="sld" data-k="'+k+'" type="range" min="'+(nose?.6:-1)+'" max="'+(nose?1.6:1)+'" step="0.02" value="'+v+'">'}).join('');
+   bodyHtml=sculptSliders();
   }else if(ctab==='sets'){
    const sets=window.CLOTHING_SETS||[];
    bodyHtml='<div class="cl"><span>Full sets: under → bottom → top → outer → shoes & accessories</span></div>'+sets.map(s=>'<div class="pcard"><b>'+s.n+'</b><button data-set="'+s.id+'">Try on</button></div>').join('');
@@ -4808,7 +4832,7 @@ let holdA=0,hc=0,hoeT=0,plotCd=0,bits=[];
  window.__farmPush=()=>{FP.forEach(q=>{if(Math.abs(q[0]-P.x)<3&&Math.abs(q[1]-P.z)<3)push(q[0],q[1],.55)});const b=FZ.w(30,18.5),sl=FZ.w(18.5,20);{const fx=sl[0]-b[0],fz=sl[1]-b[1],L=Math.hypot(fx,fz);[-2,0,2].forEach(o=>push(b[0]+fz/L*o,b[1]-fx/L*o,2.3))}push(sl[0],sl[1],1.9)}}
 const HD=new T.Group();HD.position.set(0,-1.02,.06);HD.rotation.x=2.1;add(new CY(.035,.035,1.7,6),0x8a5a2b,0,.45,0,HD);add(new BX(.36,.05,.22),0x9aa3ab,0,1.3,.1,HD);add(new BX(.08,.2,.08),0x9aa3ab,0,1.2,.02,HD);
 function attachHoe(){if(pl&&pl.ar)pl.ar.add(HD)}
-{const _rb=rebuild;rebuild=function(){_rb();attachHoe()};attachHoe()}
+{const _rb=rebuild;rebuild=function(look){_rb(look);attachHoe()};attachHoe()}
 function hoeAt(p){P.a=Math.atan2(p.x-P.x,p.z-P.z);hoeT=.4;for(let i=0;i<7;i++)bits.push({m:add(new SP(.09,5,4),0x6b4a2b,p.x+(Math.random()-.5)*1.3,.2,p.z+(Math.random()-.5)*1.3),v:2+Math.random()*2,t:.5})}
 {const _uF=update;update=function(dt){_uF(dt);
  const on=!IN&&inFarm(P.x,P.z);if(typeof TOOL!=='undefined'){if(hoeT>0)TOOL='hoe';else if(!on)TOOL='none'}HD.visible=(typeof TOOL==='undefined'||TOOL==='hoe')&&(on||hoeT>0);
@@ -5740,9 +5764,43 @@ const CLOTHING_SETS=[
  {id:'pencil',n:'👗 Pencil Set',under:'blouse',underC:0xfff8e1,top:'blouse',topC:0xf6d7e4,top2:0xffffff,pat:'dots',outer:'none',bot:'pencil',botC:0x2f3b4c,sock:'none',shoe:'flats',shoeC:0x2a2a2e,shoe2:0xf2c94c,hat:'none',bag:'satchel',bagc:0xc99a5a,scarf:'pendant',scarfc:0xf2c94c},
  {id:'rain',n:'🌧️ Rainy Day',under:'tee',underC:0x4aa3df,top:'tee',topC:0x4aa3df,top2:0xffffff,pat:'stripes',outer:'none',bot:'pants',botC:0x2d4a8a,sock:'crew',sockc:0xffffff,shoe:'rainboot',shoeC:0xf2c94c,shoe2:0x4aa3df,hat:'straw',acc:0xf2c94c,bag:'none',scarf:'none'},
  {id:'tailor',n:'🧵 Able Tailor',under:'tee',underC:0xfff3d6,top:'blouse',topC:0xf5d6e8,top2:0xffffff,pat:'dots',outer:'cardigan',outerC:0xe86f9a,bot:'skirt',botC:0xd95f8a,sock:'ankle',sockc:0xffffff,shoe:'maryjane',shoeC:0x5a3a24,shoe2:0xf2c94c,hat:'bow',acc:0xe86f9a,bag:'none',scarf:'none'},
- {id:'royal',n:'👑 Royal Layers',under:'button',underC:0xfff8e1,top:'button',topC:0xfff8e1,top2:0xd81b60,pat:'solid',outer:'coat',outerC:0xd81b60,bot:'pants',botC:0x222222,sock:'crew',sockc:0x222222,shoe:'loafer',shoeC:0x222222,shoe2:0xffd54f,hat:'crown',acc:0xffd54f,bag:'cape',bagc:0xd81b60,scarf:'pendant',scarfc:0xffd54f}
+ {id:'royal',n:'👑 Royal Layers',under:'button',underC:0xfff8e1,top:'button',topC:0xfff8e1,top2:0xd81b60,pat:'solid',outer:'coat',outerC:0xd81b60,bot:'pants',botC:0x222222,sock:'crew',sockc:0x222222,shoe:'loafer',shoeC:0x222222,shoe2:0xffd54f,hat:'crown',acc:0xffd54f,bag:'cape',bagc:0xd81b60,scarf:'pendant',scarfc:0xffd54f},
+ {id:'sleep',n:'🌙 Sleep Set',under:'none',top:'tee',topC:0xd6e4ff,top2:0xffffff,pat:'dots',outer:'none',bot:'shorts',botC:0xc5d4f5,sock:'none',shoe:'sandal',shoeC:0xf5ead0,shoe2:0xffffff,hat:'none',bag:'none',scarf:'none'},
+ {id:'sport',n:'🏃 Track Day',under:'tank',underC:0xffffff,top:'tank',topC:0xe85d5d,top2:0xffffff,pat:'stripes',outer:'none',bot:'shorts',botC:0x222222,sock:'ankle',sockc:0xffffff,shoe:'sneaker',shoeC:0xffffff,shoe2:0xe85d5d,hat:'cap',acc:0xe85d5d,bag:'none',scarf:'none'},
+ {id:'winter',n:'❄️ Winter Parka',under:'turtle',underC:0xf5ead0,top:'turtle',topC:0xf4f7fb,top2:0x9bb4c8,pat:'solid',outer:'coat',outerC:0x3d4a5c,bot:'pants',botC:0x2c3440,sock:'kneehigh',sockc:0xdfe7ef,shoe:'boots',shoeC:0x1c1c1c,shoe2:0xcfd6de,hat:'beanie',acc:0x3d4a5c,bag:'knapsack',bagc:0x4a5568,scarf:'scarf',scarfc:0xc0392b},
+ {id:'linen',n:'☀️ Linen Summer',under:'none',top:'button',topC:0xf7f1e3,top2:0xe7d7b8,pat:'solid',outer:'none',bot:'shorts',botC:0xe6d3a3,sock:'none',shoe:'sandal',shoeC:0xc4a574,shoe2:0xf3e6cf,hat:'straw',acc:0xe6d3a3,bag:'none',scarf:'none'},
+ {id:'jumpsuit',n:'🛠️ Chore Jumpsuit',under:'tee',underC:0xfff3d6,top:'overalls',topC:0x3f6b4a,top2:0xfff3d6,pat:'solid',outer:'none',bot:'pants',botC:0x2f5a3c,sock:'crew',sockc:0xefe6d6,shoe:'boots',shoeC:0x4a3424,shoe2:0xc9a36a,hat:'cap',acc:0x3f6b4a,bag:'none',scarf:'none'},
+ {id:'evening',n:'👠 Evening',under:'blouse',underC:0x1a1a1a,top:'blouse',topC:0x1a1a1a,top2:0xf2c94c,pat:'solid',outer:'none',bot:'pencil',botC:0x111111,sock:'none',shoe:'heel',shoeC:0x111111,shoe2:0xf2c94c,hat:'none',bag:'satchel',bagc:0x111111,scarf:'pendant',scarfc:0xf2c94c},
+ {id:'fisher',n:'🎣 Fisherman',under:'tee',underC:0x7ea7c9,top:'tee',topC:0x2d4a6b,top2:0xffffff,pat:'solid',outer:'vest',outerC:0x6b4a2b,bot:'cargopants',botC:0x3a4a32,sock:'crew',sockc:0x234,shoe:'boots',shoeC:0x3a2a1c,shoe2:0x8a8175,hat:'cap',acc:0x2d4a6b,bag:'satchel',bagc:0x6b4a2b,scarf:'none'},
+ {id:'school',n:'🏫 School Uniform',under:'button',underC:0xffffff,top:'button',topC:0xffffff,top2:0x243056,pat:'solid',outer:'vest',outerC:0x243056,bot:'plaid',botC:0x243056,sock:'kneehigh',sockc:0xffffff,shoe:'loafer',shoeC:0x1a1a1a,shoe2:0xffffff,hat:'none',bag:'satchel',bagc:0x243056,scarf:'bowtie',scarfc:0xb4233a},
+ {id:'festival',n:'🎆 Festival',under:'none',top:'sundress',topC:0xff7aa8,top2:0xffd54f,pat:'star',outer:'none',bot:'none',sock:'ankle',sockc:0xffffff,shoe:'maryjane',shoeC:0xffd54f,shoe2:0xff7aa8,hat:'flowers',acc:0xff7aa8,bag:'none',scarf:'none'},
+ {id:'blackturtle',n:'🖤 Black Turtleneck',under:'none',top:'turtle',topC:0x1c1c1c,top2:0x333333,pat:'solid',outer:'none',bot:'jeans',botC:0x1a2744,sock:'ankle',sockc:0x111111,shoe:'loafer',shoeC:0x111111,shoe2:0x222222,hat:'none',bag:'none',scarf:'none'},
+ {id:'hike',n:'🥾 Trail Hike',under:'tee',underC:0x7cc576,top:'tee',topC:0x3d6b4a,top2:0xdfe8d4,pat:'solid',outer:'vest',outerC:0x6b4a2b,bot:'cargopants',botC:0x4a5340,sock:'crew',sockc:0xd7c4a3,shoe:'boots',shoeC:0x3b2a1c,shoe2:0xb08968,hat:'cap',acc:0x3d6b4a,bag:'knapsack',bagc:0x4a6741,scarf:'bandana',scarfc:0xc0392b},
+ {id:'beach',n:'🏖️ Beach Day',under:'none',top:'tank',topC:0xffe08a,top2:0xffffff,pat:'stripes',outer:'none',bot:'shorts',botC:0x4aa3df,sock:'none',shoe:'sandal',shoeC:0xf2c94c,shoe2:0xffffff,hat:'straw',acc:0x4aa3df,bag:'none',scarf:'none'},
+ {id:'chef',n:'👩‍🍳 Kitchen',under:'tee',underC:0xffffff,top:'button',topC:0xf7f7f7,top2:0x222222,pat:'solid',outer:'none',bot:'pants',botC:0x2a2a2a,sock:'crew',sockc:0xffffff,shoe:'sneaker',shoeC:0xffffff,shoe2:0x222222,hat:'none',bag:'none',scarf:'none'},
+ {id:'armor',n:'🛡️ Leather Armor',under:'tee',underC:0x6b3a2a,top:'armor',topC:0x7a5230,top2:0xc9a36a,pat:'solid',outer:'none',bot:'pants',botC:0x4a3020,sock:'none',shoe:'boots',shoeC:0x3a2418,shoe2:0xc9a36a,hat:'none',bag:'none',scarf:'none'},
+ {id:'sweater',n:'🧣 Sweater Weather',under:'none',top:'sweater',topC:0xc47a6a,top2:0xf3d2c4,pat:'solid',outer:'none',bot:'jeans',botC:0x3d4d6b,sock:'crew',sockc:0xf3e6d8,shoe:'loafer',shoeC:0x5a3a24,shoe2:0xd7c4a3,hat:'beanie',acc:0xc47a6a,bag:'satchel',bagc:0x8a5a3a,scarf:'scarf',scarfc:0xf2c94c},
+ {id:'plaidskirt',n:'🎀 Plaid Skirt',under:'tee',underC:0xffffff,top:'tee',topC:0xffffff,top2:0x243056,pat:'solid',outer:'cardigan',outerC:0x243056,bot:'plaid',botC:0x8b1e3f,sock:'kneehigh',sockc:0xffffff,shoe:'maryjane',shoeC:0x1a1a1a,shoe2:0xffffff,hat:'beret',acc:0x8b1e3f,bag:'none',scarf:'none'},
+ {id:'cowboy',n:'🤠 Ranch Hand',under:'button',underC:0xf3e6cf,top:'button',topC:0xc45c26,top2:0xf3e6cf,pat:'solid',outer:'vest',outerC:0x6b3a22,bot:'jeans',botC:0x2c3f6b,sock:'crew',sockc:0xe7d3b0,shoe:'boots',shoeC:0x4a2c1a,shoe2:0xc9a36a,hat:'straw',acc:0xc45c26,bag:'none',scarf:'bandana',scarfc:0xb4233a},
+ {id:'floral',n:'🌷 Floral Mini',under:'none',top:'blouse',topC:0xfff6fb,top2:0xff9ec4,pat:'heart',outer:'none',bot:'mini',botC:0xffb6c8,sock:'ankle',sockc:0xffffff,shoe:'heel',shoeC:0xff9ec4,shoe2:0xffffff,hat:'flowers',acc:0xff9ec4,bag:'none',scarf:'none'},
+ {id:'snow',n:'⛄ Snow Walk',under:'turtle',underC:0xe8eef5,top:'hoodie',topC:0xd5dde8,top2:0xffffff,pat:'solid',outer:'coat',outerC:0x8aa0b8,bot:'pants',botC:0x4d5d73,sock:'kneehigh',sockc:0xffffff,shoe:'boots',shoeC:0xf4f7fb,shoe2:0x8aa0b8,hat:'beanie',acc:0x8aa0b8,bag:'knapsack',bagc:0x6d7c90,scarf:'scarf',scarfc:0xe85d5d},
+ {id:'apron',n:'🌾 Market Apron',under:'tee',underC:0xfff8e1,top:'overalls',topC:0x7cc576,top2:0xfff8e1,pat:'solid',outer:'none',bot:'pants',botC:0x6b4a2b,sock:'ankle',sockc:0xffffff,shoe:'boots',shoeC:0x5a3a24,shoe2:0xc99a5a,hat:'straw',acc:0x7cc576,bag:'satchel',bagc:0x8a5a2b,scarf:'bandana',scarfc:0xe85d5d},
+ {id:'nightgown',n:'🛏️ Night Gown',under:'none',top:'sundress',topC:0xe7d7f5,top2:0xffffff,pat:'dots',outer:'none',bot:'none',sock:'none',shoe:'flats',shoeC:0xe7d7f5,shoe2:0xffffff,hat:'none',bag:'none',scarf:'none'},
+ {id:'bomberstreet',n:'🧥 Street Bomber',under:'tee',underC:0xffffff,top:'tee',topC:0xf6a04d,top2:0xffffff,pat:'solid',outer:'bomber',outerC:0x2a2a2a,bot:'jeans',botC:0x243656,sock:'crew',sockc:0xffffff,shoe:'sneaker',shoeC:0xffffff,shoe2:0xe85d5d,hat:'cap',acc:0x2a2a2a,bag:'knapsack',bagc:0x2a2a2a,scarf:'none'},
+ {id:'artist',n:'🎨 Studio Artist',under:'tee',underC:0xfff3d6,top:'tee',topC:0x4aa3df,top2:0xffffff,pat:'dots',outer:'cardigan',outerC:0xf2a65a,bot:'pants',botC:0x3a3a3a,sock:'ankle',sockc:0xffffff,shoe:'sneaker',shoeC:0xf2a65a,shoe2:0xffffff,hat:'beret',acc:0x4aa3df,bag:'satchel',bagc:0x6b4a2b,scarf:'none'},
+ {id:'maid',n:'🫖 Tea House',under:'blouse',underC:0xfff8e1,top:'blouse',topC:0xfff8e1,top2:0x222222,pat:'solid',outer:'none',bot:'skirt',botC:0x1a1a1a,sock:'kneehigh',sockc:0xffffff,shoe:'maryjane',shoeC:0x1a1a1a,shoe2:0xffffff,hat:'none',bag:'none',scarf:'bowtie',scarfc:0x1a1a1a},
+ {id:'runner',n:'👟 Road Runner',under:'none',top:'tank',topC:0x7cc576,top2:0xffffff,pat:'solid',outer:'none',bot:'leggings',botC:0x1e2a24,sock:'ankle',sockc:0xffffff,shoe:'sneaker',shoeC:0x7cc576,shoe2:0x111111,hat:'none',bag:'none',scarf:'none'},
+ {id:'raincoat',n:'☔ Rain Slicker',under:'tee',underC:0xfff3d6,top:'tee',topC:0xfff3d6,top2:0x4aa3df,pat:'solid',outer:'coat',outerC:0xf2c94c,bot:'pants',botC:0x2d4a8a,sock:'crew',sockc:0xffffff,shoe:'rainboot',shoeC:0xf2c94c,shoe2:0x4aa3df,hat:'straw',acc:0xf2c94c,bag:'none',scarf:'none'},
+ {id:'kimono',n:'🌸 Island Kimono',under:'none',top:'sundress',topC:0xf7e3ee,top2:0xe86f9a,pat:'heart',outer:'none',bot:'none',sock:'none',shoe:'flats',shoeC:0xf5d6e8,shoe2:0xe86f9a,hat:'flowers',acc:0xe86f9a,bag:'none',scarf:'none'},
+ {id:'office',n:'💼 Office Day',under:'button',underC:0xffffff,top:'button',topC:0xf4f4f4,top2:0x2c3a6b,pat:'solid',outer:'none',bot:'pencil',botC:0x2c3a6b,sock:'crew',sockc:0x222233,shoe:'heel',shoeC:0x1a1a1a,shoe2:0xcfd3dc,hat:'none',bag:'satchel',bagc:0x2c3a6b,scarf:'necktie',scarfc:0x2c3a6b},
+ {id:'punk',n:'🎸 Punk',under:'tank',underC:0x111111,top:'tank',topC:0x111111,top2:0xe85d5d,pat:'solid',outer:'vest',outerC:0x222222,bot:'jeans',botC:0x1a1a1a,sock:'striped',sockc:0xe85d5d,shoe:'boots',shoeC:0x111111,shoe2:0xe85d5d,hat:'none',bag:'none',scarf:'none',gl:'shades'},
+ {id:'picnic',n:'🧺 Picnic',under:'tee',underC:0xfff8e1,top:'blouse',topC:0xfff8e1,top2:0x7cc576,pat:'dots',outer:'cardigan',outerC:0xf6a04d,bot:'skirt',botC:0x7cc576,sock:'ankle',sockc:0xffffff,shoe:'flats',shoeC:0xf6a04d,shoe2:0xfff8e1,hat:'straw',acc:0xf6a04d,bag:'satchel',bagc:0xc99a5a,scarf:'none'},
+ {id:'sailorcoat',n:'🚢 Harbor Coat',under:'sailor',underC:0xffffff,top:'sailor',topC:0xffffff,top2:0x1d3557,pat:'stripes',outer:'coat',outerC:0x1d3557,bot:'pants',botC:0x1d3557,sock:'crew',sockc:0xffffff,shoe:'loafer',shoeC:0x1d3557,shoe2:0xffffff,hat:'beret',acc:0x1d3557,bag:'none',scarf:'none'}
 ];
-function applySet(look,setId){const set=typeof setId==='object'?setId:(CLOTHING_SETS.find(s=>s.id===setId)||CLOTHING_SETS[0]);if(!look||!set)return look;const put=(k,v)=>{if(v!==undefined)look[k]=v};put('under',set.under||'none');put('underC',set.underC);put('topStyle',set.top||'tee');put('shirt',set.topC);put('shirt2',set.top2);put('pat',set.pat||'solid');put('outer',set.outer||'none');put('outerC',set.outerC);put('botStyle',(set.top==='sundress'||set.bot==='none')?'none':(set.bot||'pants'));put('pants',set.botC);put('sock',set.sock==null?'ankle':set.sock);put('sockc',set.sockc);put('shoeStyle',set.shoe||'sneaker');put('shoe',set.shoeC);put('shoe2',set.shoe2);put('scarf',set.scarf||'none');put('scarfc',set.scarfc);if(set.hat!=null)look.at=set.hat;if(set.acc!=null)look.acc=set.acc;if(set.bag!=null)look.bag=set.bag;if(set.bagc!=null)look.bagc=set.bagc;if(set.gl!=null)look.gl=set.gl;return look}
+function applySet(look,setId){const set=typeof setId==='object'?setId:(CLOTHING_SETS.find(s=>s.id===setId)||CLOTHING_SETS[0]);if(!look||!set)return look;
+ look.under='none';look.outer='none';look.bag='none';look.scarf='none';look.at='none';look.gl='none';look.pat='solid';look.sock='ankle';
+ delete look.underC;delete look.outerC;delete look.bagc;delete look.scarfc;
+ const put=(k,v)=>{if(v!==undefined)look[k]=v};put('under',set.under||'none');put('underC',set.underC);put('topStyle',set.top||'tee');put('shirt',set.topC);put('shirt2',set.top2);put('pat',set.pat||'solid');put('outer',set.outer||'none');put('outerC',set.outerC);put('botStyle',(set.top==='sundress'||set.bot==='none')?'none':(set.bot||'pants'));put('pants',set.botC);put('sock',set.sock==null?'ankle':set.sock);put('sockc',set.sockc);put('shoeStyle',set.shoe||'sneaker');put('shoe',set.shoeC);put('shoe2',set.shoe2);put('scarf',set.scarf||'none');put('scarfc',set.scarfc);if(set.hat!=null)look.at=set.hat;if(set.acc!=null)look.acc=set.acc;if(set.bag!=null)look.bag=set.bag;if(set.bagc!=null)look.bagc=set.bagc;if(set.gl!=null)look.gl=set.gl;return look}
 window.CLOTHING_SETS=CLOTHING_SETS;window.applySet=applySet;
 window.__stageSet=function(id,pay){try{if(!window.__fitUndo)window.__fitUndo=JSON.parse(JSON.stringify(APP));window.__fitPay=!!pay;applySet(APP,id);window.PI_EMOTE={type:'pose',t:1.3};rebuild();const cu=document.getElementById('cust');if(cu){cu.style.display='block';if(window.__drawCust)window.__drawCust()}}catch(e){console.warn('stage',e)}};
 window.__fitOk=function(){if(window.__fitPay){if(typeof bells!=='undefined'&&bells<150){try{say('Sable: That set is 150 bells, dear.',2600)}catch(e){}return}bells-=150;try{hud()}catch(e){}}window.__fitUndo=null;window.__fitPay=false;try{saveApp()}catch(e){}try{say('Kept. The whole set, not just the top. 🧵',2400)}catch(e){}if(window.__drawCust)window.__drawCust()};
@@ -5758,7 +5816,7 @@ function newBody(g,o){const u=g.ud;u.look=o;u.noEmote=!!o.noEmote;u.nb=1;const z
  const slOf=s=>{const a=ALIAS[s]||s;return a&&SL[a]!=null?SL[a]:(a?2:0)},slv=Math.max(slOf(top),outer?slOf(outer):0),sleeveCol=(outer&&slOf(outer)>=slOf(top))?outCol:topCol;
  const sCore=sx(CORE,tx,tz),shell=sx(SHELL,tx,tz),pelv=sx(PELV,hip,hip*.98),au=sx(AU,1+mus*.2,1+mus*.16,len),fa=sx(FA,1+mus*.12,1+mus*.1,len),th=sx(TH,1+mus*.15+zf('hip')*.06,1+mus*.12,len),shn=sx(SHN,1+mus*.08,1+mus*.08,len);
  [u.torso,u.armL,u.armR,u.legL,u.legR].forEach(r=>r&&r.traverse(m=>{if(m.isMesh&&!(r===u.torso&&m.parent!==r))m.visible=false}));
- tube(T0,NECK,sk,12,0,0,0,0);
+ tube(T0,sx(NECK,1+zf('neckW')*.22,1+zf('neckW')*.16),sk,12,0,0,0,0);
  if(top==='none')tube(T0,sCore,sk,16,0,0,0,0);
  else if(top==='crop')tube(T0,clip(sCore,1.55,2.2,0),sk,14,0,0,0,0);
  const grow=(sc)=>sx(shell,sc,sc);
@@ -5767,7 +5825,11 @@ function newBody(g,o){const u=g.ud;u.look=o;u.noEmote=!!o.noEmote;u.nb=1;const z
  else if(top==='crop')tube(T0,clip(grow(1.065),2.32,2.96,.01),remapped?topCol:(pmap?0xffffff:topCol),14,0,0,0,2,remapped?null:pmap);
  else if(top&&top!=='none'){tube(T0,grow(1.065),remapped?topCol:(pmap?0xffffff:topCol),16,0,0,0,2,remapped?null:pmap);tube(T0,clip(grow(1.07),1.74,1.84,.006),dk(topCol,.82),12,0,0,0,2);if(top==='turtle'||top==='hoodie'||top==='sweater')tube(T0,clip(sx(NECK,1.18,1.18),2.9,3.16,.02),topCol,12,0,0,0,2)}
  if(top==='overalls'){mk(new T.BoxGeometry(.28,.34,.04),pc,T0,0,2.28,.23,3);[-1,1].forEach(s=>mk(new T.BoxGeometry(.045,.42,.03),pc,T0,s*.12,2.55,.18,3))}
- if(outer){tube(T0,grow(1.095),remapped&&pmap?0xffffff:outCol,18,0,0,0,4,remapped?pmap:null,OPEN[outer]?0.46:0);if(OPEN[outer]){mk(new T.BoxGeometry(.055,.55,.02),dk(outCol,.78),T0,.12,2.4,.24,5);mk(new T.BoxGeometry(.055,.55,.02),dk(outCol,.78),T0,-.12,2.4,.24,5)}}
+ if(outer){tube(T0,grow(1.095),remapped&&pmap?0xffffff:outCol,18,0,0,0,4,remapped?pmap:null,OPEN[outer]?0.46:0);if(OPEN[outer]){mk(new T.BoxGeometry(.055,.55,.02),dk(outCol,.78),T0,.12,2.4,.24,5);mk(new T.BoxGeometry(.055,.55,.02),dk(outCol,.78),T0,-.12,2.4,.24,5)}
+  if(outer==='coat')tube(T0,[[1.05,.46*tx,.34*tz],[1.4,.4*tx,.3*tz],[1.78,.34*tx,.24*tz]],outCol,16,0,0,0,4,null,.5)}
+ if(top==='hoodie'||outer==='hoodie'){tube(T0,[[2.55,.2,.14],[2.85,.28,.2],[3.12,.18,.12]],top==='hoodie'?topCol:outCol,12,0,0,-.16,4)}
+ if(top==='polo'||top==='button'){const colr=mk(new T.TorusGeometry(.115,.028,6,14),dk(topCol,.82),T0,0,2.96,0,3);colr.rotation.x=Math.PI/2}
+ if(['pants','jeans','cargopants','joggers'].includes(bot)&&top!=='sundress'){const belt=mk(new T.TorusGeometry(.3,.018,6,16),0x3a2a1c,T0,0,1.9,0,4);belt.rotation.x=Math.PI/2;belt.scale.z=.72;mk(new T.BoxGeometry(.06,.04,.02),0xf2c94c,T0,0,1.9,.2,5)}
  if(['button','henley','polo','denim','coat','cardigan'].includes(top)||['coat','cardigan','denim'].includes(outer)){for(let i=0;i<4;i++)mk(new SP(.016,8,6),0xf2c94c,T0,.04,2.12+i*.16,.25,6)}
  const skirtY={mini:1.52,pencil:1.02,longskirt:.78,skirt:1.15,plaid:1.15};
  if(bot!=='none'&&top!=='sundress'){
@@ -5780,13 +5842,14 @@ function newBody(g,o){const u=g.ud;u.look=o;u.noEmote=!!o.noEmote;u.nb=1;const z
   else if(slv===1){tube(a,clip(au,-.28,.1,.014),sleeveCol,14,0,0,0,4);tube(a,clip(au,-.28,-.16,.02),dk(sleeveCol,.82),12,0,0,0,4);tube(f,fa,sk,14);tube(f,clip(fa,-.08,.04,0),sk,12)}
   else{tube(a,clip(au,-.5,.1,.014),sleeveCol,14,0,0,0,4);tube(f,clip(fa,-.42,.04,.012),sleeveCol,14,0,0,0,4);tube(f,clip(fa,-.46,-.34,.02),dk(sleeveCol,.82),12,0,0,0,4);tube(f,clip(fa,-.5,-.4,0),sk,12)}
   const h=f.children.find(c=>c.isGroup);if(h){tube(h,PALM,sk,12);[.078,.09,.086,.07].forEach((ln,i)=>{const x=(i-1.5)*.022,m=tube(h,[[-ln,0,0],[-ln+.006,.01,.01],[-ln*.45,.012,.012],[0,.013,.013],[.008,0,0]],sk,8,x,-.12,.01);m.rotation.x=-.25-i*.04;m.rotation.z=(i-1.5)*.06});const thb=tube(h,[[-.07,0,0],[-.06,.012,.012],[-.02,.015,.014],[.006,0,0]],sk,8,s*.04,-.05,.02);thb.rotation.x=-.55;thb.rotation.z=-s*.35}
-  if(LONG[bot]){const lo=bot==='capri'?-.34:-.74;tube(lg,clip(th,-.77,.06,.016),pc,14,0,0,0,3);tube(sh,clip(shn,lo,.05,bot==='flared'?.045:bot==='leggings'?.006:.014),pc,14,0,0,0,3);if(bot==='capri')tube(sh,clip(shn,-.76,lo,0),sk,12);else if(bot!=='leggings')tube(sh,clip(shn,lo,lo+.08,.02),dk(pc,.82),12,0,0,0,3)}
+  if(LONG[bot]){const lo=bot==='capri'?-.34:-.74;tube(lg,clip(th,-.77,.06,.016),pc,14,0,0,0,3);tube(sh,clip(shn,lo,.05,bot==='flared'?.045:bot==='leggings'?.006:.014),pc,14,0,0,0,3);if(bot==='capri')tube(sh,clip(shn,-.76,lo,0),sk,12);else if(bot!=='leggings')tube(sh,clip(shn,lo,lo+.08,.02),dk(pc,.82),12,0,0,0,3);if(bot==='jeans'||bot==='cargopants')mk(new T.BoxGeometry(.09,.1,.02),dk(pc,.72),lg,s*.11,-.28,.12,4)}
   else if(SHORT[bot]!=null){const y0=SHORT[bot];tube(lg,clip(th,-.8,y0,0),sk,14);tube(lg,clip(th,y0,.06,.018),pc,14,0,0,0,3);tube(lg,clip(th,y0,y0+.06,.026),dk(pc,.82),12,0,0,0,3);tube(sh,shn,sk,14)}
   else{tube(lg,th,sk);tube(sh,shn,sk)}
   const sock=o.sock||'ankle',kc=o.sockc!==undefined?o.sockc:0xffffff,covered=LONG[bot]&&bot!=='capri';
   if(!covered&&sock!=='none'){const hh=(sock==='knee'||sock==='kneehigh')?-.16:sock==='crew'?-.42:sock==='striped'?-.34:-.62;tube(sh,clip(shn,-.75,hh,.012),kc,12,0,0,0,2);tube(sh,clip(shn,hh-.05,hh,.02),dk(kc,.85),10,0,0,0,2);if(sock==='striped')tube(sh,clip(shn,hh-.12,hh-.06,.018),t2,10,0,0,0,2)}
   const ft=sh.children.find(c=>c.isGroup),ss=o.shoeStyle||'sneaker',s1=o.shoe!==undefined?o.shoe:0x4a3020,s2=o.shoe2!==undefined?o.shoe2:0xffffff;
   if(ft){if(ss==='sandal'){mk(new T.BoxGeometry(.2,.028,.44),s1,ft,0,-.07,.1,4);mk(new T.BoxGeometry(.16,.018,.04),s2,ft,0,-.02,.2,4);mk(new T.BoxGeometry(.16,.018,.04),s2,ft,0,-.02,.04,4);mk(new SP(1,12,8),sk,ft,0,-.01,.08).scale.set(.08,.045,.16)}
+   else if(ss==='heel'){mk(new SP(1,16,12),s1,ft,0,-.02,.12).scale.set(.09,.04,.2);mk(new T.BoxGeometry(.07,.1,.07),s1,ft,0,-.08,-.02,4);mk(new T.BoxGeometry(.09,.014,.025),s2,ft,0,.02,.18,4)}
    else if(ss==='flats'||ss==='maryjane'||ss==='loafer'){mk(new SP(1,16,12),s1,ft,0,-.03,.1).scale.set(.095,.045,.21);mk(new SP(1,12,8),sk,ft,0,.015,.02).scale.set(.07,.035,.1);if(ss==='maryjane')mk(new T.BoxGeometry(.17,.016,.03),s1,ft,0,.035,.08,4);if(ss==='loafer'||ss==='flats')mk(new T.BoxGeometry(.09,.014,.025),s2,ft,0,.03,.16,4)}
    else{mk(new SP(1,20,14),s1,ft,0,-.02,.09).scale.set(.098,.07,.22);mk(new SP(1,16,10),ss==='sneaker'?s2:dk(s1,.62),ft,0,-.085,.1).scale.set(.105,.032,.24);
     if(ss==='sneaker'){mk(new SP(1,14,10),s2,ft,0,-.02,.2).scale.set(.09,.055,.1);[.05,.11,.17].forEach(zz=>mk(new T.BoxGeometry(.09,.012,.02),0xffffff,ft,0,.045,zz,4))}
@@ -5803,9 +5866,9 @@ function newBody(g,o){const u=g.ud;u.look=o;u.noEmote=!!o.noEmote;u.nb=1;const z
  else if(scf==='bandana')mk(new T.BoxGeometry(.22,.1,.03),scc,T0,0,2.82,.2,5);
  else if(scf==='pendant')mk(new SP(.04,8,6),scc,T0,0,2.6,.24,5);
  const hs=1+zf('height')*.1;if(hs!==1)g.scale.y*=hs;const hd=1+zf('headScale')*.14;if(hd!==1&&u.head&&u.head.parent&&u.head.parent!==g)u.head.parent.scale.multiplyScalar(hd)}
-function mkHuman(look){const o=Object.assign({kind:'human'},look||{});if(o.s==null)o.s=.74;return chibi(o)}
+function mkHuman(look){const o=Object.assign({kind:'human'},look||{});if(o.s==null)o.s=.74;const g=chibi(o);try{if(window.decorate)window.decorate(g)}catch(e){}return g}
 window.mkHuman=mkHuman;
-chibi=function(o){const g=_ch(o);if(o&&o.kind==='human'&&g.ud&&g.ud.torso&&g.ud.legL){try{newBody(g,o)}catch(e){console.warn('body',e)}}return g}}
+chibi=function(o){const g=_ch(o);if(o&&o.kind==='human'&&g.ud){g.ud.look=o;if(g.ud.torso&&g.ud.legL){try{newBody(g,o)}catch(e){console.warn('body',e)}}}return g}}
 // ===== CHARACTER PASS: biomechanical gait, idle life, secondary motion, joint detail, footstep dust =====
 {const _ac=animChar,_rb=rebuild,dmp=(c,v,r,dt)=>c+(v-c)*(1-Math.exp(-r*dt)),cl=(x,a,b)=>Math.max(a,Math.min(b,x)),dust=[];let di=0;
 for(let i=0;i<12;i++){const m=add(new SP(.14,6,5),0xd8c9a2,0,-9,0);m.material.transparent=true;m.visible=false;m.a=0;dust.push(m)}
@@ -5836,7 +5899,7 @@ function decorate(p){const u=p&&p.ud;if(!u||!u.isHuman||p.dec)return;p.dec=1;if(
  const lk=u.look||(typeof APP!=='undefined'?APP:{}),dk=new T.Color(lk.col==null?0xffdcb0:lk.col).lerp(new T.Color(0xe08a8a),.4).getHex(),dot=(par,r,x,y,z,c,sx,sy,sz)=>{const m=add(new SP(r,8,6),c,x,y,z,par);m.scale.set(sx||1,sy||1,sz||1);return m};
  [['foreL','hnL'],['foreR','hnR']].forEach(q=>{const f=u[q[0]];dot(f,.0725,0,0,.004,dk);const h=f.children.find(c=>c.isGroup);u[q[1]]=h;if(h)[-.03,-.01,.01,.03].forEach(x=>{dot(h,.0145,x,-.108,0,dk);dot(h,.0085,x,-.192,.008,0xf7d9d2,1,.35,.6)})});
  ['shinL','shinR'].forEach(k=>dot(u[k],.099,0,0,.004,dk));u.ftL=u.shinL.children.find(c=>c.isGroup);u.ftR=u.shinR.children.find(c=>c.isGroup);dressUp(u,dot);smoothAll(p);wrapPlacket(u)}
-rebuild=function(look){_rb(look);decorate(pl)};rebuild();
+window.decorate=decorate;window.rigUp=rigUp;rebuild=function(look){_rb(look);decorate(pl)};rebuild();
 animChar=function(g,t,arms){_ac(g,t,arms);const u=g.ud;if(!u||!u.isHuman||!u.legL)return;
  const em=window.PI_EMOTE;if(em&&em.type&&em.t>0&&!u.noEmote)return;if(g===pl&&typeof mountedHorse!=='undefined'&&mountedHorse)return;
  const G=u.G||(u.G={ph:0,sp:0,lx:g.position.x,lz:g.position.z,lt:t,ry:g.rotation.y,yv:0,bp:0,jn:{},ws:0,wt:0,ly:0,lp:0,nt:2,fl:[0,0],ac:0});
