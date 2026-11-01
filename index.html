@@ -1782,7 +1782,7 @@ function act(){
  else if(t.t==='daisy'){if(bells<tb*10)say('Daisy Mae: Oh, you need '+tb*10+' bells for 10 turnips!');else{bells-=tb*10;inv.tn=(inv.tn||0)+10;say('Daisy Mae: Thank you! Sell them Mon–Sat when the price is high! 🥔',3800)}}
  else if(t.t==='weed'){S.remove(t.o);weeds.splice(weeds.indexOf(t.o),1);prog('weed');inv.weed=(inv.weed||0)+1;bells+=15;gain(1);say('Pulled a weed! +15 🔔 and a 🌿 for crafting')}
  else if(t.t==='plot'){const p=t.o;if(plotCd>0)return;plotCd=.3;
- if(p.s===0){hoeAt(p);till(p);p.s=1;gain(1)}
+ if(p.s===0){hoeAt(p);till(p);p.s=1;gain(1);const w=window.PI_NEM&&window.PI_NEM.world;if(w)w.hoed=(w.hoed||0)+1}
  else if(p.s===1){const k=CR[sel];if(lvl<k.lv)say(k.n+' unlocks at level '+k.lv+'!');else if(bells<k.seed&&!(inv.sd&&inv.sd[k.n]>0))say('No '+k.n+' seeds! Buy some at the Seed Shop 🌱 (or have '+k.seed+' coins).');else{if(inv.sd&&inv.sd[k.n]>0)inv.sd[k.n]--;else bells-=k.seed;p.s=2;p.t=0;p.k=k;mkCrop(p)}}
  else if(p.s===2)say(p.k.n+': '+Math.ceil(p.k.tm-p.t)+'s left…',1500);
  else{bells+=p.k.sell;cropHarvest(p);p.g=null;p.s=1;gain(p.k.xp);say('Harvested '+p.k.e+'! +'+p.k.sell+' coins')}}
@@ -4052,7 +4052,7 @@ setInterval(saveNem,6000);
 // ---- counters for things the game doesn't already count
 const cropN=()=>Object.values(inv.crop||{}).reduce((a,b)=>a+b,0),sCnt=f=>plots.filter(f).length;
 function guideSnap(){return{b:bells,m:mailN,bd:TW.done,bq:inv.bq||0,bz:buzz,dn:dn,pl:plots.length,pn:sCnt(p=>p.s>=2),wt:sCnt(p=>p.s===2&&p.w),cr:cropN()}}
-function guideDiff(s,t){const w=NEM.world,inc=(k,n)=>{if(n>0)w[k]=(w[k]||0)+n};
+function guideDiff(s,t){const w=(window.PI_NEM&&window.PI_NEM.world)||NEM.world;if(!w)return;const inc=(k,n)=>{if(n>0)w[k]=(w[k]||0)+n};
  if(t&&t.t==='shop'&&bells>s.b)inc('sold',1);
  
  if(mailN<s.m)inc('mail',1);
