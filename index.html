@@ -1080,7 +1080,10 @@ function chibi(o){
   // Sideburns
   [-1,1].forEach(s=>sp(h,hm,s*.93,-.12,-.10,.17,.40,.30));
   // 4 Bangs / Fringe Styles
-  if(bng==='straight'){
+  if(bng==='none'){/* cap only */}
+  else if(bng==='wispy'){
+   [-.3,-.1,.12,.32].forEach((x,i)=>sp(h,i%2?hm2:hm,x,.32,.9,.1,.16,.08).rotation.z=(i-1.5)*.15);
+  }else if(bng==='straight'){
    [-.42,-.21,0,.21,.42].forEach((x,i)=>sp(h,i%2?hm2:hm,x,.38,.84-Math.abs(x)*.18,.18,.22,.16));
   }else if(bng==='swept'){
    sp(h,hm,-.22,.38,.84,.48,.19,.18).rotation.z=.22;
@@ -1172,6 +1175,21 @@ function chibi(o){
   sp(ht,hm2,.62,-.88,.20,.38,.45,.36);
  }else if(hst==='afropuffs'){
   [-1,1].forEach(s=>sp(ht,s<0?hm:hm2,s*.75,.82,-.12,.44,.44,.44));
+ }else if(hst==='medium'){
+  sp(h,hm,0,-.32,-.18,.98,.58,.82);
+  [-1,1].forEach(s=>sp(h,hm2,s*.9,-.42,.05,.16,.42,.28));
+ }else if(hst==='undercut'){
+  sp(h,hm,-.35,.42,-.08,.72,.5,.78);
+  sp(h,hm2,-.55,-.05,.15,.22,.35,.2);
+ }else if(hst==='braid'){
+  for(let j=0;j<7;j++)sp(ht,j%2?hm2:hm,.05,-.05-j*.16,-.15+(j%2)*.04,.16,.15,.16);
+  sp(ht,o.acc||0xe85d5d,.05,-1.15,-.05,.1,.06,.1);
+ }
+ // Strand cards: layered clumps under the hat line. Length/volume live on the look and only scale the tail.
+ {const len=1+(o.hairLen||0)*.5,vol=1+(o.hairVol||0)*.4,n={short:4,pixie:4,undercut:5,spiky:0,bald:0,bun:4,twinbuns:4,medium:7,bob:7,pony:8,braid:6,braids:6,long:10,wavy:10,halfup:8,pigtails:6,side:7,wolf:6,curly:6,pomp:3,afropuffs:4}[hst];
+  if(n){const L=.35+({short:.15,pixie:.12,undercut:.2,bun:.2,medium:.45,bob:.5,pony:.85,braid:.8,braids:.75,long:1.05,wavy:1.1,halfup:.7}[hst]||.4)*len;
+   for(let i=0;i<n;i++){const t=n<2?0:i/(n-1)-.5,card=new T.Mesh(new T.CylinderGeometry(.05*vol,.012*vol,L,5),i%2?hm2:hm);card.position.set(t*(.7+.4*vol),-.15-L*.35,-.35-Math.abs(t)*.15);card.rotation.x=.22+Math.abs(t)*.2;card.rotation.z=t*.35;ht.add(card)}}
+  ht.scale.set(vol,1,vol);
  }
 
  // 6. 12 3D HEADWEAR STYLES (at) & 8 EYEWEAR STYLES (gl)
@@ -1432,7 +1450,25 @@ function refFace(ou,o,MS,u){
  [-1,1].forEach(s=>{const eg=new T.Group();eg.position.set(s*1.0,-.02,-.02);eg.rotation.y=s*1.15;h.add(eg);
   const helix=new T.Mesh(new T.TorusGeometry(.15,.032,6,14,Math.PI*1.55),skin);helix.rotation.z=s*.2;eg.add(helix);
   E(skinD,s*.02,.02,.03,.07,.1,.04,eg);E(skin,0,-.15,.02,.06,.08,.045,eg)});
- if(['pony','long','wavy','braids','halfup','bob'].indexOf(o.hs)>=0){const hm=MS(hairC,.72);for(let i=0;i<6;i++){const strand=new T.Mesh(new T.CylinderGeometry(.018,.008,.62,5),hm);strand.position.set((i-2.5)*.1,-.5,-.62);strand.rotation.x=.4+(i%3)*.06;strand.rotation.z=(i-2.5)*.05;h.add(strand)}}
+ // Piercings: small metal on the look. They follow the face surface and the helix ears.
+ {const pc=o.pierceC!=null?o.pierceC:0xf2c94c,met=MS(pc,.28,.75),stud=(x,y,z,r)=>{const m=E(met,x,y,z,r||.028,r||.028,r||.028);return m};
+  const lobe=o.lobe||'none',helix=o.helix||'none';
+  [-1,1].forEach(s=>{
+   if(lobe==='hoop'){const hp=new T.Mesh(new T.TorusGeometry(.05,.012,6,12),met);hp.position.set(s*1.02,-.2,.04);hp.rotation.y=s*Math.PI/2;h.add(hp)}
+   else if(lobe==='stud')stud(s*1.03,-.17,.06,.03);
+   if(helix==='ring'){const hp=new T.Mesh(new T.TorusGeometry(.04,.01,5,10),met);hp.position.set(s*1.05,.08,-.02);hp.rotation.z=s*.6;h.add(hp)}
+   else if(helix==='stud')stud(s*1.06,.1,0,.025);
+  });
+  const np=o.nosePierce||'none';
+  if(np==='ring'){const hp=new T.Mesh(new T.TorusGeometry(.035,.01,5,10),met);hp.position.set(.04,-.2,fz(.04,-.2)+.02);h.add(hp)}
+  else if(np==='stud')stud(0,-.2,fz(0,-.2)+.03,.022);
+  const bp=o.browPierce||'none';
+  if(bp==='bar'){const b=new T.Mesh(new T.CylinderGeometry(.012,.012,.16,6),met);b.position.set(.38,.3,fz(.38,.3)+.02);b.rotation.z=Math.PI/2;h.add(b)}
+  else if(bp==='stud')stud(.4,.28,fz(.4,.28)+.025,.024);
+  const lp=o.lipPierce||'none';
+  if(lp==='ring'){const hp=new T.Mesh(new T.TorusGeometry(.03,.008,5,10),met);hp.position.set(0,-.4,fz(0,-.4)+.015);h.add(hp)}
+  else if(lp==='stud')stud(.06,-.4,fz(.06,-.4)+.02,.02);
+ }
  return eyes}
 // ===== PALWORLD-STYLE HUMAN: ~6.5 heads tall, sculpted limbs/hands/feet, layered clothing. Set oldBody:true in APP for the old chibi body =====
 {const _ch=chibi;chibi=function(o){const og=_ch(o);return(o&&o.kind==='human'&&!o.oldBody)?palChar(o,og):og}}
@@ -1614,7 +1650,8 @@ const npc=chibi({kind:'rabbit',col:0xf4b6c2,muz:0xffffff,shirt:0xfff3d6,s:.8});n
 function sh(p){const m=add(new CY(.7,.7,.02,16),0x000000,0,.03,0,p);m.material.transparent=true;m.material.opacity=.25}
 const APP={
  build:'classic',col:0xffdcb0,ears:'human',earring:'none',earc:0xf2c94c,
- hair:0x5a3a24,hair2:'same',hs:'bun',bangs:'parted',
+ hair:0x5a3a24,hair2:'same',hs:'bun',bangs:'parted',hairLen:0,hairVol:0,
+ lobe:'none',helix:'none',nosePierce:'none',browPierce:'none',lipPierce:'none',pierceC:0xf2c94c,
  eyes:'oval',eyec:0x14100e,eyec2:'same',brows:'natural',nose:'button',mouth:'smile',blush:'soft',mark:'none',
  topStyle:'cardigan',pat:'solid',shirt:0xf6a04d,shirt2:0xffffff,scarf:'none',scarfc:0xe85d5d,
  botStyle:'pants',pants:0x6b8cc7,sock:'ankle',sockc:0xffffff,shoeStyle:'sneaker',shoe:0x4a3020,shoe2:0xffffff,
@@ -1887,9 +1924,9 @@ const K={},joy={x:0,y:0};
   ['long','🌊 Long Flowing'],['wavy','🧜‍♀️ Mermaid Wavy'],['bob','💇‍♀️ Chic Bob'],['short','✂️ Classic Short'],
   ['pixie','🧚 Pixie Cut'],['spiky','⚡ Anime Spiky'],['curly','☁️ Curly Cloud'],['braids','🌾 Twin Braids'],
   ['wolf','🐺 Wolf Shag'],['pomp','🕺 Pompadour'],['halfup','👑 Half-Up'],['side','🍃 Side Sweep'],
-  ['afropuffs','✨ Afro Puffs'],['bald','🥚 Bald']
+  ['afropuffs','✨ Afro Puffs'],['medium','✂️ Shoulder'],['undercut','🪒 Undercut'],['braid','🌾 Single Braid'],['bald','🥚 Bald']
  ];
- const BANGS=[['parted','Curtain Part'],['straight','Full Fringe'],['swept','Side-Swept'],['ahoge','🌱 Ahoge Cowlick']];
+ const BANGS=[['parted','Curtain Part'],['straight','Full Fringe'],['swept','Side-Swept'],['ahoge','🌱 Ahoge Cowlick'],['none','No Bangs'],['wispy','Wispy']];
  const HC=[0x5a3a24,0x1e1a1a,0x3b2416,0xc9892b,0xe8c06a,0xf5e1a4,0xb5472f,0xd9383a,0xd9d9e0,0xff7aa8,0xff4081,0xb48cff,0x4aa3df,0x283593,0x7cc576,0x2e7d32,0xff8a65,0x9575cd];
 
  const TOPS=[
@@ -2045,11 +2082,13 @@ const K={},joy={x:0,y:0};
     sculptSliders();
   }else if(ctab==='hair'){
    bodyHtml=
-    row('💇‍♀️ 3D Hairstyle (18 Styles)','hs',HS)+
-    row('✂️ Bangs / Fringe Style','bangs',BANGS)+
-    row('🎨 Primary Hair Color','hair',HC,1)+
-    '<div class="cl"><span>🌈 Highlights / Ombré Tips</span></div><div class="cr"><button data-k="hair2" data-v="same" class="'+(APP.hair2==='same'?'on':'')+'">Solid</button>'+
-    HC.map(x=>'<button data-k="hair2" data-v="'+x+'" class="sw '+(APP.hair2===x?'on':'')+'" style="background:'+hx(x)+'"></button>').join('')+'</div>';
+    row('💇‍♀️ Hairstyle ('+HS.length+')','hs',HS)+
+    row('✂️ Bangs / Fringe','bangs',BANGS)+
+    row('🎨 Hair color','hair',HC,1)+
+    '<div class="cl"><span>🌈 Highlight</span></div><div class="cr"><button data-k="hair2" data-v="same" class="'+(APP.hair2==='same'?'on':'')+'">Solid</button>'+
+    HC.map(x=>'<button data-k="hair2" data-v="'+x+'" class="sw '+(APP.hair2===x?'on':'')+'" style="background:'+hx(x)+'"></button>').join('')+'</div>'+
+    '<div class="cl"><span>Length</span><b data-sv="hairLen">'+Number(APP.hairLen||0).toFixed(2)+'</b></div><input class="sld" data-k="hairLen" type="range" min="-1" max="1" step="0.02" value="'+(APP.hairLen||0)+'">'+
+    '<div class="cl"><span>Volume</span><b data-sv="hairVol">'+Number(APP.hairVol||0).toFixed(2)+'</b></div><input class="sld" data-k="hairVol" type="range" min="-1" max="1" step="0.02" value="'+(APP.hairVol||0)+'">';
   }else if(ctab==='top'){
    bodyHtml=
     row('👕 Top','topStyle',TOPS)+
@@ -2077,7 +2116,13 @@ const K={},joy={x:0,y:0};
     row('🎨 Hat / Ribbon Color','acc',CL,1)+
     row('👓 Eyewear & Shades','gl',GL)+
     row('🎨 Frame Color','glc',CL,1)+
-    row('💎 Earrings','earring',EARR);
+    row('💎 Earrings','earring',EARR)+
+    row('👂 Lobe piercing','lobe',[['none','None'],['stud','Stud'],['hoop','Hoop']])+
+    row('👂 Helix','helix',[['none','None'],['stud','Stud'],['ring','Ring']])+
+    row('👃 Nose','nosePierce',[['none','None'],['stud','Stud'],['ring','Ring']])+
+    row('🤨 Brow','browPierce',[['none','None'],['stud','Stud'],['bar','Bar']])+
+    row('👄 Lip','lipPierce',[['none','None'],['stud','Stud'],['ring','Ring']])+
+    row('✨ Metal','pierceC',[0xf2c94c,0xe8e8e8,0xb87333,0x222222],1);
   }else if(ctab==='bag'){
    bodyHtml=
     row('🎒 Backpacks, Wings & Capes','bag',BAGS)+
@@ -2089,8 +2134,8 @@ const K={},joy={x:0,y:0};
   }else if(ctab==='sculpt'){
    bodyHtml=sculptSliders();
   }else if(ctab==='sets'){
-   const sets=window.CLOTHING_SETS||[];
-   bodyHtml='<div class="cl"><span>Full sets: under → bottom → top → outer → shoes & accessories</span></div>'+sets.map(s=>'<div class="pcard"><b>'+s.n+'</b><button data-set="'+s.id+'">Try on</button></div>').join('');
+   const sets=window.CLOTHING_SETS||[],cat=s=>s.cat||(/sleep|night/.test(s.id)?'sleep':/sport|runner/.test(s.id)?'sport':/rain|snow|winter/.test(s.id)?'weather':/evening|office|royal|maid/.test(s.id)?'formal':/apron|jumpsuit|cowboy|hike|fisher|chef|island/.test(s.id)?'work':/sundress|floral|festival|kimono|picnic/.test(s.id)?'dress':/armor/.test(s.id)?'armor':'casual'),f=window.__setFilter||'all',cats=['all','casual','work','formal','dress','weather','sport','sleep','armor'];
+   bodyHtml='<div class="cr">'+cats.map(c=>'<button data-sf="'+c+'" class="'+(f===c?'on':'')+'">'+c+'</button>').join('')+'</div><div class="cl"><span>'+sets.filter(s=>f==='all'||cat(s)===f).length+' looks</span></div>'+sets.filter(s=>f==='all'||cat(s)===f).map(s=>'<div class="pcard"><b>'+s.n+'</b><button data-set="'+s.id+'">Try on</button></div>').join('');
   }
 
   const fit=window.__fitUndo?'<div class="emote-row" style="margin-top:6px"><button data-fitok="1">Keep'+(window.__fitPay?' · 150 🔔':'')+'</button><button data-fitno="1">Cancel try-on</button></div>':'';
@@ -2162,6 +2207,7 @@ const K={},joy={x:0,y:0};
    window.PI_EMOTE={type:'spin',t:1.4};
    rebuild();saveApp();draw();ding();return;
   }
+  if(b.dataset.sf){window.__setFilter=b.dataset.sf;draw();return}
   if(b.dataset.set){window.__editLook=APP;if(window.__stageSet)window.__stageSet(b.dataset.set,false);ding();return}
   if(b.dataset.fitok){window.__fitOk&&window.__fitOk();return}
   if(b.dataset.fitno){window.__fitNo&&window.__fitNo();return}
@@ -5807,7 +5853,10 @@ const CLOTHING_SETS=[
  {id:'office',n:'💼 Office Day',under:'button',underC:0xffffff,top:'button',topC:0xf4f4f4,top2:0x2c3a6b,pat:'solid',outer:'none',bot:'pencil',botC:0x2c3a6b,sock:'crew',sockc:0x222233,shoe:'heel',shoeC:0x1a1a1a,shoe2:0xcfd3dc,hat:'none',bag:'satchel',bagc:0x2c3a6b,scarf:'necktie',scarfc:0x2c3a6b},
  {id:'punk',n:'🎸 Punk',under:'tank',underC:0x111111,top:'tank',topC:0x111111,top2:0xe85d5d,pat:'solid',outer:'vest',outerC:0x222222,bot:'jeans',botC:0x1a1a1a,sock:'striped',sockc:0xe85d5d,shoe:'boots',shoeC:0x111111,shoe2:0xe85d5d,hat:'none',bag:'none',scarf:'none',gl:'shades'},
  {id:'picnic',n:'🧺 Picnic',under:'tee',underC:0xfff8e1,top:'blouse',topC:0xfff8e1,top2:0x7cc576,pat:'dots',outer:'cardigan',outerC:0xf6a04d,bot:'skirt',botC:0x7cc576,sock:'ankle',sockc:0xffffff,shoe:'flats',shoeC:0xf6a04d,shoe2:0xfff8e1,hat:'straw',acc:0xf6a04d,bag:'satchel',bagc:0xc99a5a,scarf:'none'},
- {id:'sailorcoat',n:'🚢 Harbor Coat',under:'sailor',underC:0xffffff,top:'sailor',topC:0xffffff,top2:0x1d3557,pat:'stripes',outer:'coat',outerC:0x1d3557,bot:'pants',botC:0x1d3557,sock:'crew',sockc:0xffffff,shoe:'loafer',shoeC:0x1d3557,shoe2:0xffffff,hat:'beret',acc:0x1d3557,bag:'none',scarf:'none'}
+ {id:'sailorcoat',n:'🚢 Harbor Coat',under:'sailor',underC:0xffffff,top:'sailor',topC:0xffffff,top2:0x1d3557,pat:'stripes',outer:'coat',outerC:0x1d3557,bot:'pants',botC:0x1d3557,sock:'crew',sockc:0xffffff,shoe:'loafer',shoeC:0x1d3557,shoe2:0xffffff,hat:'beret',acc:0x1d3557,bag:'none',scarf:'none'},
+ {id:'gala',n:'🕯️ Candlelight Gala',cat:'formal',under:'blouse',underC:0x1a1020,top:'blouse',topC:0x4a1942,top2:0xf2c94c,pat:'solid',outer:'coat',outerC:0x2a1024,bot:'longskirt',botC:0x2a1024,sock:'none',shoe:'heel',shoeC:0x1a1020,shoe2:0xf2c94c,hat:'none',bag:'none',scarf:'pendant',scarfc:0xf2c94c},
+ {id:'silk',n:'🛌 Silk Sleep',cat:'sleep',under:'none',top:'sundress',topC:0xd9c6ef,top2:0xfff8e1,pat:'solid',outer:'none',bot:'none',sock:'none',shoe:'flats',shoeC:0xd9c6ef,shoe2:0xffffff,hat:'none',bag:'none',scarf:'none'},
+ {id:'orchard',n:'🍎 Orchard Chore',cat:'work',under:'tee',underC:0xfff3d6,top:'button',topC:0xc45c26,top2:0xfff3d6,pat:'solid',outer:'vest',outerC:0x6b4a2b,bot:'jeans',botC:0x3a4e78,sock:'crew',sockc:0xfff3d6,shoe:'boots',shoeC:0x4a3020,shoe2:0xc99a5a,hat:'straw',acc:0xc45c26,bag:'satchel',bagc:0x6b4a2b,scarf:'bandana',scarfc:0xe85d5d}
 ];
 function applySet(look,setId){const set=typeof setId==='object'?setId:(CLOTHING_SETS.find(s=>s.id===setId)||CLOTHING_SETS[0]);if(!look||!set)return look;
  look.under='none';look.outer='none';look.bag='none';look.scarf='none';look.at='none';look.gl='none';look.pat='solid';look.sock='ankle';
