@@ -11,6 +11,7 @@ Plant crops, fish, craft, visit neighbors, and grow your little getaway.
 ## Controls
 - On-screen joystick + **A** button (touch and mouse)
 - Map, craft, pets, and more from the HUD buttons
+- 👤 opens the wardrobe studio (turntable, full outfit sets, face and body sliders). Mabel, beside your door, wears the same human body.
 
 ## Files
 - `index.html` — the whole game. GitHub Pages serves it at the PLAY link above.
